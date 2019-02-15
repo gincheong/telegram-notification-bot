@@ -1,15 +1,15 @@
 import telegram
 import log
+from constants import Commands as CMD
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-# import func
 
-# botFather에게 setprivacy로 그룹으로 보내지는 일반 메세지도 읽도록 설정한 상태
+# /setprivacy DISABLED # 명령이 아닌 그룹 메세지에도 반응
 
 class keyNotiBot :
   def __init__(self) :
+    ###############################################
     self.token = <BOT_ID>
-    self.name = "keywordNoti_Bot"
-    self.id = <USER_CHAT_ID> # 내 계정 아이디
+    ###############################################
 
     self.core = telegram.Bot(self.token)
     self.updater = Updater(self.token)
@@ -29,6 +29,12 @@ class keyNotiBot :
     else :
       return False
 
+  def isMyMsg(self, update) :
+    if update.message.from_user['id'] == self.id :
+      return True
+    else :
+      return False
+
   def msgHandler(self, func) :
     self.updater.dispatcher.add_handler(MessageHandler(Filters.text, func))
   def cmdHandler(self, cmd, func) :
@@ -37,12 +43,12 @@ class keyNotiBot :
   def initHandler(self) :
     self.msgHandler(self.getMessage)
     
-    self.cmdHandler('keyword', self.addKeyword)
-    self.cmdHandler('help', self.cmdHelp)
-    self.cmdHandler('start', self.cmdHelp)
-    self.cmdHandler('list', self.showList)
-    self.cmdHandler('delete', self.deleteKeyword)
-    self.cmdHandler('info', self.showInfo)
+    self.cmdHandler(CMD.KEYWORD, self.addKeyword)
+    self.cmdHandler(CMD.HELP, self.cmdHelp)
+    self.cmdHandler(CMD.START, self.cmdHelp)
+    self.cmdHandler(CMD.LIST, self.showList)
+    self.cmdHandler(CMD.DELETE, self.deleteKeyword)
+    self.cmdHandler(CMD.INFO, self.showInfo)
 
     self.cmdHandler('debug', self.debug)
 
@@ -66,6 +72,10 @@ class keyNotiBot :
     self.sendMessage("/list : 설정한 키워드 목록을 확인합니다.")
 
   def getMessage(self, bot, update) :
+    if self.isMyMsg(update) :
+      return
+      # 내가 보내는 메세지면 더 읽을 필요 없다
+
     if self.readMessage == True and self.isPrivateMsg(update) == False :
       # 메세지를 읽어도 되는 상황이면 (명령어 인식 중이 아님)
       # + 개인 메세지가 아니면
@@ -91,10 +101,9 @@ class keyNotiBot :
       return
 
     self.readMessage = False # 명령어 입력을 위해 메세지 읽기 중단
-
     userInput = update.message.text
 
-    if userInput == "/keyword" : # 아무 키워드로 입력하지 않음
+    if userInput == ("/" + CMD.KEYWORD) : # 아무 키워드로 입력하지 않음
       self.sendMessage("추가할 키워드를 입력해주세요.\n" + \
         "ex> /keyword 안녕 (\"안녕\" 키워드 추가)")
           # 사용법 보여줌
@@ -126,16 +135,19 @@ class keyNotiBot :
       return
 
     self.readMessage = False
-    self.sendMessage("삭제할 키워드를 입력하세요.")
+    userInput = update.message.text
 
-    deleteTarget = update.message.text
-
-    if deleteTarget in self.keywordList :
-      self.keywordList.remove(deleteTarget)
-      self.sendMessage("삭제되었습니다.")
-      self.log.info("keyword deleted : " + deleteTarget)
+    if userInput == ("/" + CMD.DELETE) :
+      self.sendMessage("삭제할 키워드를 입력하세요.\n" + \
+        "ex> /delete 안녕 (\"안녕\" 키워드 삭제)")
     else :
-      self.sendMessage("등록되지 않은 키워드입니다.")
+      deleteTarget = userInput[8 : ]
+      if deleteTarget in self.keywordList :
+        self.keywordList.remove(deleteTarget)
+        self.sendMessage("삭제되었습니다.")
+        self.log.info("keyword deleted : " + deleteTarget)
+      else :
+        self.sendMessage("등록되지 않은 키워드입니다.")
     
     self.readMessage = True
 
@@ -144,7 +156,7 @@ class keyNotiBot :
       return
     
     update.message.reply_text("개발중인 봇입니다.")
-    update.message.reply_text("카카오톡의 키워드 알림 쓰고시펑")
+    update.message.reply_text("카카오톡의 키워드 알림 쓰고시퍼성")
 
 if __name__ == "__main__":
     knoti = keyNotiBot()
