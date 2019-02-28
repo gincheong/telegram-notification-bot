@@ -12,15 +12,15 @@ class Log :
 
   def info(self, text) :
     self.updateTimeStamp()
-    self.f.writelines(self.timestamp + " [INFO] " + text)
+    self.f.write(self.timestamp + " [INFO] " + text)
     self.f.flush()
 
   def warn(self, text) :
     self.updateTimeStamp()
-    self.f.writelines(self.timestamp + " [WARN] " + text)
+    self.f.write(self.timestamp + " [WARN] " + text)
     self.f.flush()
 
   def error(self, text) :
     self.updateTimeStamp()
-    self.f.writelines(self.timestamp + " [ERROR] " + text)
+    self.f.write(self.timestamp + " [ERROR] " + text)
     self.f.flush()
