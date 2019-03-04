@@ -25,8 +25,6 @@ class keyNotiBot :
     self.log.info("Program Start")
     # 로그 기록
 
-    self.chatLog = open("chatlog", mode="a+t", encoding="utf-8")
-
   def isPrivateMsg(self, update) :
     if update.message.chat['type'] == 'private' :
       # 봇에게 직접 메세지를 보낼 때
@@ -89,7 +87,6 @@ class keyNotiBot :
     for each in self.f :
       self.keywordDic[self.userId].append(each.strip()) # \n 개행문자를 제거하고 읽어옴
     self.log.info("저장된 키워드 읽어오기 성공, " + ", ".join(self.keywordDic[self.userId]))
-  
 
   # userFunc
   def cmdHelp(self, bot, update) :
@@ -105,9 +102,6 @@ class keyNotiBot :
     if self.isMyMsg(update) :
       return
       # 내가 보내는 메세지면 더 읽을 필요 없다
-
-    # self.chatLog.writelines(str(update.message) + "\n")
-    # self.chatLog.flush()
 
     if self.readMessage == True and self.isPrivateMsg(update) == False :
       # 메세지를 읽어도 되는 상황이면 (명령어 인식 중이 아님)
@@ -191,9 +185,14 @@ class keyNotiBot :
         self.keywordDic[self.userId].remove(deleteTarget)
         self.sendMessage("삭제되었습니다.")
 
-        self.f.seek(0, os.SEEK_SET)
         # 파일에서 삭제하기
+        self.f.seek(0) #처음으로 이동하고
+        self.f.truncate() #모두 삭제함
 
+        # 다시 파일에 쓰기
+        for each in self.keywordDic[self.userId] :
+          self.f.write(each + "\n")
+        self.f.flush()
 
         self.log.info("keyword deleted : " + deleteTarget)
       else :
@@ -206,7 +205,11 @@ class keyNotiBot :
       return
     
     update.message.reply_text("개발중인 봇입니다.")
-    update.message.reply_text("카카오톡처럼 키워드 알림 쓰고시퍼용")
+    update.message.reply_text("서버가 없어서 내킬 때마다 켜서 씁니다.\n" + \
+            "저장한 키워드는 개발자 하드에 저장됩니다.\n" + \
+            "봇을 그룹 내에 참여시켜야만 작동하며, 그룹 내의 모든 채팅을 봇이 읽습니다.\n" + \
+            "키워드 알람이 발생한 대화를 제외한 어떤 대화 내용도 기록하지 않습니다.\n" + \
+            "https://github.com/gincheong/telegram-notification-bot")
 
 if __name__ == "__main__":
     knoti = keyNotiBot()
