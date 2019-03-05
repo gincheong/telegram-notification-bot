@@ -5,3 +5,6 @@ class Commands :
   LIST = "list"
   INFO = "info"
   START = "start"
+
+class Firebase :
+  KEYWORD = "/keywords"

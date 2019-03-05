@@ -1,9 +1,13 @@
 import telegram
 import os
+import firebase_admin
+from firebase_admin import credentials
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from firebase import firebase
 
 import log
 from constants import Commands as CMD
+from constants import Firebase as FB
 
 # /setprivacy DISABLED # 명령이 아닌 그룹 메세지에도 반응
 
@@ -11,6 +15,12 @@ class keyNotiBot :
   def __init__(self) :
     ###############################################
     self.token = <BOT_TOKEN>
+    self.firebase = firebase.FirebaseApplication(<FIREBASE_URL>, None)
+
+    # cred = credentials.Certificate('/PATH/TO/KEY.json)
+    # app = firebase_admin.initialize_app(cred)
+    # SDK 활성화
+
     ###############################################
 
     self.core = telegram.Bot(self.token)
@@ -20,9 +30,8 @@ class keyNotiBot :
     self.readMessage = True
     self.keywordDic = {}
 
-
     self.log = log.Log()
-    self.log.info("Program Start")
+    self.log.info("000", "Program Start")
     # 로그 기록
 
   def isPrivateMsg(self, update) :
@@ -42,8 +51,6 @@ class keyNotiBot :
     self.updater.dispatcher.add_handler(MessageHandler(Filters.text, func))
   def cmdHandler(self, cmd, func) :
     self.updater.dispatcher.add_handler(CommandHandler(cmd, func))
-  def sendMessage(self, text) :
-    self.core.send_message(chat_id=self.userId, text=text)
   
   def initHandler(self) :
     self.cmdHandler(CMD.KEYWORD, self.addKeyword)
@@ -60,7 +67,7 @@ class keyNotiBot :
     print(update.message)
 
   def boot(self) :
-    self.log.info("Bot Start")
+    self.log.info("000", "Bot Start")
     self.cmdHandler(CMD.START, self.start)
 
     self.updater.start_polling()
@@ -70,23 +77,28 @@ class keyNotiBot :
     if self.isPrivateMsg(update) == False :
       # 개인 메세지로 보낸 명령어가 아니면 실행 안함
       return
-    self.log.info("Start 명령어를 읽었습니다.")
-    update.message.reply_text("봇을 시작합니다.")
-    update.message.reply_text("명령어가 활성화되었습니다. /help 명령어로 사용 가능한 명령어 목록을 볼 수 있습니다.")
+
+    self.userId = update.message.chat['id']
+    self.log.info(self.userId, "Start 명령어를 읽었습니다.")
+    update.message.reply_text("봇을 시작합니다.\n" + \
+            "사용자가 등록한 키워드가 사용되면 봇이 메세지를 보내 알립니다.\n" + \
+            "ex>\n" +\
+            "홍 길동 님이 호출했습니다.\n" + \
+            "그룹 이름 : 율도국\n" + \
+            "메세지 내용 : 안녕하세요")
+    update.message.reply_text("/help 명령어로 사용 가능한 명령어 목록을 볼 수 있습니다.")
     self.initHandler()
     # 명령어를 활성화시킨다.
 
-    # DB로 가서 기존 데이터가 있는지 확인
-    # 지금은 대충 파일로 대체
+    # firebase에서 키워드를 가져온다
+    keywords = self.firebase.get(FB.KEYWORD, str(self.userId))
 
-    self.userId = update.message.chat['id']
-    self.f = open(str(self.userId), 'a+t', encoding='utf-8')
-    # 텍스트 읽기+쓰기 모드, 기존 파일 내용 보존
-    self.keywordDic[self.userId] = list()
-    self.f.seek(0, os.SEEK_SET)
-    for each in self.f :
-      self.keywordDic[self.userId].append(each.strip()) # \n 개행문자를 제거하고 읽어옴
-    self.log.info("저장된 키워드 읽어오기 성공, " + ", ".join(self.keywordDic[self.userId]))
+    if keywords == None :
+      self.log.info(self.userId, "저장된 키워드 없음")
+      self.keywordDic[self.userId] = list()
+    else :
+      self.keywordDic[self.userId] = keywords
+      self.log.info(self.userId, "저장된 키워드 읽어오기 성공 : " + ", ".join(self.keywordDic[self.userId]))
 
   # userFunc
   def cmdHelp(self, bot, update) :
@@ -98,10 +110,11 @@ class keyNotiBot :
       "/list : 설정한 키워드 목록을 확인합니다.\n" + \
       "/info : 봇 정보를 확인합니다.")
 
+  # 그룹 메세지를 읽어서 키워드를 확인하는 함수
   def getMessage(self, bot, update) :
+    # 자기 자신의 메세지에는 호출 반응 하지 않는다
     if self.isMyMsg(update) :
       return
-      # 내가 보내는 메세지면 더 읽을 필요 없다
 
     if self.readMessage == True and self.isPrivateMsg(update) == False :
       # 메세지를 읽어도 되는 상황이면 (명령어 인식 중이 아님)
@@ -126,7 +139,7 @@ class keyNotiBot :
             "메세지 내용 : " + update.message.text
 
           self.core.send_message(chat_id=self.userId, text=notiMsg)
-          self.log.info("send notiMsg : " + senderName + ", " + groupName + ", " + update.message.text)
+          self.log.info(self.userId, "알람 전송 : " + senderName + ", " + groupName + ", " + update.message.text)
           
           break # 호출 단어가 두 개 이상 사용되어도, 한 번만 알린다.
 
@@ -139,20 +152,25 @@ class keyNotiBot :
     userInput = update.message.text
 
     if userInput == ("/" + CMD.KEYWORD) : # 아무 키워드로 입력하지 않음
-      self.sendMessage("추가할 키워드를 입력해주세요.\n" + \
+      update.message.reply_text("추가할 키워드를 입력해주세요.\n" + \
         "ex> /keyword 안녕 (\"안녕\" 키워드 추가)")
           # 사용법 보여줌
     else :
-      newKeyword = userInput[9 : ]
-      if newKeyword in self.keywordDic[self.userId] :
-        self.sendMessage("이미 등록된 키워드입니다.")
+      newKeyword = userInput[9 : ] # 사용자 입력에서 키워드 따오기
+      if self.keywordDic[self.userId] is not None :
+        if newKeyword in self.keywordDic[self.userId] :
+          update.message.reply_text("이미 등록된 키워드입니다.")
+        else :
+          self.keywordDic[self.userId].append(str(newKeyword))
+          update.message.reply_text('"' + str(newKeyword) + '"' + " 키워드를 추가했습니다.")
+          self.log.info(self.userId, "새 키워드 추가 : " + str(newKeyword))
+          self.firebase.put(FB.KEYWORD, str(self.userId), self.keywordDic[self.userId])
       else :
-        self.keywordDic[self.userId].append(str(newKeyword))
-        self.sendMessage('"' + str(newKeyword) + '"' + " 키워드를 추가했습니다.")
-        self.log.info("new keyword added : " + str(newKeyword))
+        self.keywordDic[self.userId] = str(newKeyword)
+        update.message.reply_text('"' + str(newKeyword) + '"' + " 키워드를 추가했습니다.")
+        self.log.info(self.userId, "새 키워드 추가 : " + str(newKeyword))
 
-        self.f.writelines(str(newKeyword) + "\n")
-        self.f.flush()
+        self.firebase.put(FB.KEYWORD, str(self.userId), self.keywordDic[self.userId])
 
     self.readMessage = True
 
@@ -160,14 +178,16 @@ class keyNotiBot :
     if self.isPrivateMsg(update) == False :
       return
 
-    self.sendMessage("등록된 키워드 목록입니다.")
+    update.message.reply_text("등록된 키워드 목록을 확인합니다.")
 
-    listToString = ""
-    for each in self.keywordDic[self.userId] :
-      listToString += '"' + each + '" '
-
-    self.sendMessage(listToString)
-    self.log.info("current keyword list : " + listToString)
+    listToString = str()
+    if self.keywordDic[self.userId] is not None :
+      for each in self.keywordDic[self.userId] :
+        listToString += '"' + each + '" '
+      update.message.reply_text(listToString)
+      self.log.info("현재 키워드 목록 확인 : " + listToString)
+    else :
+      update.message.reply_text("등록된 키워드가 없습니다.")
   
   def deleteKeyword(self, bot, update) :
     if self.isPrivateMsg(update) == False :
@@ -177,26 +197,24 @@ class keyNotiBot :
     userInput = update.message.text
 
     if userInput == ("/" + CMD.DELETE) :
-      self.sendMessage("삭제할 키워드를 입력하세요.\n" + \
+      update.message.reply_text("삭제할 키워드를 입력하세요.\n" + \
         "ex> /delete 안녕 (\"안녕\" 키워드 삭제)")
     else :
       deleteTarget = userInput[8 : ]
-      if deleteTarget in self.keywordDic[self.userId] :
-        self.keywordDic[self.userId].remove(deleteTarget)
-        self.sendMessage("삭제되었습니다.")
+      if self.keywordDic[self.userId] is not None :
+        if deleteTarget in self.keywordDic[self.userId] :
+          self.keywordDic[self.userId].remove(deleteTarget)
+          update.message.reply_text("삭제되었습니다.")
 
-        # 파일에서 삭제하기
-        self.f.seek(0) #처음으로 이동하고
-        self.f.truncate() #모두 삭제함
+          self.firebase.put(FB.KEYWORD, str(self.userId), self.keywordDic[self.userId])
 
-        # 다시 파일에 쓰기
-        for each in self.keywordDic[self.userId] :
-          self.f.write(each + "\n")
-        self.f.flush()
-
-        self.log.info("keyword deleted : " + deleteTarget)
+          self.log.info(self.userId, "키워드 삭제 : " + deleteTarget)
+        else :
+          self.log.info(self.userId, "키워드 삭제 실패")
+          update.message.reply_text("등록되지 않은 키워드입니다.")
       else :
-        self.sendMessage("등록되지 않은 키워드입니다.")
+        update.message.reply_text("등록된 키워드가 없습니다.")
+        self.log.warn("등록된 키워드 없는 상태에서 삭제 시도")
     
     self.readMessage = True
 
@@ -206,10 +224,11 @@ class keyNotiBot :
     
     update.message.reply_text("개발중인 봇입니다.")
     update.message.reply_text("서버가 없어서 내킬 때마다 켜서 씁니다.\n" + \
-            "저장한 키워드는 개발자 하드에 저장됩니다.\n" + \
+            "키워드 데이터는 구글 Firebase에 저장하고 있습니다.\n" + \
+            "현재 DB는 공개된 상태입니다. 개인정보를 입력하지 마세요.\n" + \
             "봇을 그룹 내에 참여시켜야만 작동하며, 그룹 내의 모든 채팅을 봇이 읽습니다.\n" + \
             "키워드 알람이 발생한 대화를 제외한 어떤 대화 내용도 기록하지 않습니다.\n" + \
-            "https://github.com/gincheong/telegram-notification-bot")
+            "github.com/gincheong/telegram-notification-bot")
 
 if __name__ == "__main__":
     knoti = keyNotiBot()
