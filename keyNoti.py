@@ -6,8 +6,9 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from firebase import firebase
 
 import log
-from constants import Commands as CMD
+from constants import Command as CMD
 from constants import Firebase as FB
+from constants import Message as MSG
 
 # /setprivacy DISABLED # 명령이 아닌 그룹 메세지에도 반응
 
@@ -17,7 +18,7 @@ class keyNotiBot :
     self.token = <BOT_TOKEN>
     self.firebase = firebase.FirebaseApplication(<FIREBASE_URL>, None)
 
-    # cred = credentials.Certificate('/PATH/TO/KEY.json)
+    # cred = credentials.Certificate('/PATH/TO/KEY.json')
     # app = firebase_admin.initialize_app(cred)
     # SDK 활성화
 
@@ -80,18 +81,18 @@ class keyNotiBot :
 
     self.userId = update.message.chat['id']
     self.log.info(self.userId, "Start 명령어를 읽었습니다.")
-    update.message.reply_text("봇을 시작합니다.\n" + \
-            "사용자가 등록한 키워드가 사용되면 봇이 메세지를 보내 알립니다.\n" + \
-            "ex>\n" +\
-            "홍 길동 님이 호출했습니다.\n" + \
-            "그룹 이름 : 율도국\n" + \
-            "메세지 내용 : 안녕하세요")
-    update.message.reply_text("/help 명령어로 사용 가능한 명령어 목록을 볼 수 있습니다.")
+    self.log.warn(self.userId, str(update.message))
+    update.message.reply_html(MSG.WELCOME)
+    update.message.reply_html(MSG.PREVIEW)
     self.initHandler()
     # 명령어를 활성화시킨다.
 
     # firebase에서 키워드를 가져온다
-    keywords = self.firebase.get(FB.KEYWORD, str(self.userId))
+    try :
+      keywords = self.firebase.get(FB.KEYWORD, str(self.userId))
+    except Exception as e :
+      self.log.error(self.userId, "[Firebase] Start시 키워드 가져오기 : " + str(e))
+      update.message.reply_text("오류가 발생했습니다.")
 
     if keywords == None :
       self.log.info(self.userId, "저장된 키워드 없음")
@@ -105,10 +106,7 @@ class keyNotiBot :
     if self.isPrivateMsg(update) == False :
       # 개인 메세지가 아니면 실행안함
       return
-    update.message.reply_text("/keyword <...> : 알람을 받을 키워드를 설정합니다.\n" + \
-      "/delete <...> : 등록된 키워드를 삭제합니다.\n" + \
-      "/list : 설정한 키워드 목록을 확인합니다.\n" + \
-      "/info : 봇 정보를 확인합니다.")
+    update.message.reply_text(MSG.CMDLIST)
 
   # 그룹 메세지를 읽어서 키워드를 확인하는 함수
   def getMessage(self, bot, update) :
@@ -157,20 +155,29 @@ class keyNotiBot :
           # 사용법 보여줌
     else :
       newKeyword = userInput[9 : ] # 사용자 입력에서 키워드 따오기
-      if self.keywordDic[self.userId] is not None :
+      if self.keywordDic[self.userId] is not None : 
         if newKeyword in self.keywordDic[self.userId] :
           update.message.reply_text("이미 등록된 키워드입니다.")
         else :
           self.keywordDic[self.userId].append(str(newKeyword))
           update.message.reply_text('"' + str(newKeyword) + '"' + " 키워드를 추가했습니다.")
           self.log.info(self.userId, "새 키워드 추가 : " + str(newKeyword))
-          self.firebase.put(FB.KEYWORD, str(self.userId), self.keywordDic[self.userId])
-      else :
+
+          try :
+            self.firebase.put(FB.KEYWORD, str(self.userId), self.keywordDic[self.userId])
+          except Exception as e :
+            self.log.error(self.userId, "[Firebase] 새 키워드 추가 : " + str(e))
+            update.message.reply_text("오류가 발생했습니다.")
+      else : # None이면 기존에 저장된 키워드가 없는 것
         self.keywordDic[self.userId] = str(newKeyword)
         update.message.reply_text('"' + str(newKeyword) + '"' + " 키워드를 추가했습니다.")
         self.log.info(self.userId, "새 키워드 추가 : " + str(newKeyword))
 
-        self.firebase.put(FB.KEYWORD, str(self.userId), self.keywordDic[self.userId])
+        try :
+          self.firebase.put(FB.KEYWORD, str(self.userId), self.keywordDic[self.userId])
+        except Exception as e :
+          self.log.error(self.userId, "[Firebase] 새 키워드 추가 : " + str(e))
+          update.message.reply_text("오류가 발생했습니다.")
 
     self.readMessage = True
 
@@ -206,13 +213,17 @@ class keyNotiBot :
           self.keywordDic[self.userId].remove(deleteTarget)
           update.message.reply_text("삭제되었습니다.")
 
-          self.firebase.put(FB.KEYWORD, str(self.userId), self.keywordDic[self.userId])
-
+          try :
+            self.firebase.put(FB.KEYWORD, str(self.userId), self.keywordDic[self.userId])
+          except Exception as e :
+            self.log.error(self.userId, "[Firebase] 키워드 삭제 : " + str(e))
+            update.message.reply_text("오류가 발생했습니다.")
+          
           self.log.info(self.userId, "키워드 삭제 : " + deleteTarget)
         else :
           self.log.info(self.userId, "키워드 삭제 실패")
           update.message.reply_text("등록되지 않은 키워드입니다.")
-      else :
+      else : # None이면 키워드 없는 상태
         update.message.reply_text("등록된 키워드가 없습니다.")
         self.log.warn("등록된 키워드 없는 상태에서 삭제 시도")
     
@@ -223,12 +234,7 @@ class keyNotiBot :
       return
     
     update.message.reply_text("개발중인 봇입니다.")
-    update.message.reply_text("서버가 없어서 내킬 때마다 켜서 씁니다.\n" + \
-            "키워드 데이터는 구글 Firebase에 저장하고 있습니다.\n" + \
-            "현재 DB는 공개된 상태입니다. 개인정보를 입력하지 마세요.\n" + \
-            "봇을 그룹 내에 참여시켜야만 작동하며, 그룹 내의 모든 채팅을 봇이 읽습니다.\n" + \
-            "키워드 알람이 발생한 대화를 제외한 어떤 대화 내용도 기록하지 않습니다.\n" + \
-            "github.com/gincheong/telegram-notification-bot")
+    update.message.reply_html(MSG.INFO, disable_web_page_preview=True)
 
 if __name__ == "__main__":
     knoti = keyNotiBot()
