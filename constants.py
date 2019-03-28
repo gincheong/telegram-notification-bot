@@ -1,13 +1,19 @@
+class Bool :
+  ON = 1
+  OFF = 0
+
 class Command :
-  DELETE = "delete"
-  KEYWORD = "keyword"
+  KDELETE = "kdel"
+  KADD = "kadd"
+  KLIST = "klist"
+
+  GDELETE = "gdel"
+  GTOGGLE = "gtoggle"
+  GLIST = "glist"
+
   HELP = "help"
-  LIST = "list"
   INFO = "info"
   START = "start"
-  TOGGLE = "toggle"
-
-  GROUP = "group"
 
 class FirebaseURL :
   KEYWORD = "/keyword"
@@ -27,10 +33,14 @@ class Message :
             "메세지 내용 : 안녕하세요" + \
             '</i>'
 
-  CMDLIST = "/keyword <...> : 알람을 받을 키워드를 설정합니다.\n" + \
-            "/delete <...> : 등록된 키워드를 삭제합니다.\n" + \
-            "/list : 설정한 키워드 목록을 확인합니다.\n" + \
-            "/toggle : 키워드 알림을 On/Off 합니다.\n" + \
+  CMDLIST = "/kadd <...> : 알람을 받을 키워드를 설정합니다.\n" + \
+            "/kdel <...> : 등록된 키워드를 삭제합니다.\n" + \
+            "/klist : 설정한 키워드 목록을 확인합니다.\n" + \
+            "\n" + \
+            "/glist : 사용자에게 등록된 그룹 목록을 확인합니다.\n" + \
+            "/gtoggle : 그룹별로 키워드 알림을 On/Off 합니다.\n" + \
+            "/gdel : 이미 등록된 그룹을 삭제합니다.\n" + \
+            "\n" + \
             "/info : 봇 정보를 확인합니다."
 
   INFO = "서버가 없어서 비정기적으로 실행중입니다.\n" + \
@@ -40,4 +50,5 @@ class Message :
             "키워드 알람이 발생한 대화를 제외한 어떤 대화 내용도 기록하지 않습니다.\n" + \
             'Github : <a href="https://github.com/gincheong/telegram-notification-bot">gincheong</a>'
   
-  WARN = "알림을 활성화시킬 그룹에 봇을 초대하고, 그룹 내 채팅으로 봇에게 /start 명령어를 입력하세요."
+  WARN = "알림을 활성화시킬 그룹에 봇을 초대하고, 그룹 내 채팅으로 봇에게 /start 명령어를 입력하세요.\n" + \
+            "/help 로 명령어 목록을 볼 수 있습니다."
