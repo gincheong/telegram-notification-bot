@@ -7,9 +7,11 @@
 3. <b>봇과의 개인 대화로</b> 키워드를 등록합니다.
 
 
+#
+python-telegram-bot 11.1.0 (LGPLv3.0)
 
-python-telegram-bot 11.1.0
-firebase_admin 2.16.0
+firebase_admin 2.16.0 (Apache2.0)
+
 python 3.6.7
 
 program is running on AWS
