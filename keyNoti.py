@@ -49,6 +49,8 @@ class keyNotiBot :
 
     self.cmdHandler(CMD.HELP, self.showHelp)
     self.cmdHandler(CMD.INFO, self.showInfo)
+    self.cmdHandler(CMD.HOWTO, self,showHowto)
+
     self.cmdHandler(CMD.START, self.start)
 
     self.msgHandler(self.getMessage)
@@ -70,7 +72,7 @@ class keyNotiBot :
   # userFunc
   def start(self, bot, update) :
     if self.isPrivateMsg(update) == True : # 개인톡으로 start를 보내면 경고함
-      update.message.reply_text(MSG.WARN)
+      update.message.reply_text(MSG.WELCOME)
       return
 
     groupID = update.message.chat['id']
@@ -103,8 +105,13 @@ class keyNotiBot :
   def showInfo(self, bot, update) :
     if self.isPrivateMsg(update) == False :
       return
-    update.message.reply_text("개발중인 봇입니다.")
+    # update.message.reply_text("개발중인 봇입니다.")
     update.message.reply_html(MSG.INFO, disable_web_page_preview=True)
+
+  def showHowto(self, bot, update) :
+    if self.isPrivateMsg(update) == False :
+      return
+    update.message.reply_html(MSG.HOWTO)
 
   # 그룹 메세지를 읽어서 키워드를 확인하는 함수
   def getMessage(self, bot, update) : 

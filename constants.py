@@ -14,6 +14,7 @@ class Command :
   HELP = "help"
   INFO = "info"
   START = "start"
+  HOWTO = "howto"
 
 class FirebaseURL :
   KEYWORD = "/keyword"
@@ -22,15 +23,14 @@ class FirebaseURL :
   USER  = "/user"
 
 class Message :
-  WELCOME = "봇을 시작합니다.\n" + \
-            "사용자가 등록한 키워드가 사용되면 봇이 메세지를 보내 알립니다.\n" + \
-            "/help 로 사용 가능한 명령어 목록을 볼 수 있습니다.\n"
+  WELCOME = "원하는 그룹에 봇을 초대하고, 그룹 내 채팅으로 봇에게 /start 명령어를 입력하세요.\n" + \
+            "/howto 로 사용 방법, /help로 사용 가능한 명령어 목록을 볼 수 있습니다."
 
   PREVIEW = '<i>' + \
-            "EX>\n" + \
+            "EX> 키워드로 '아이즈원' 을 등록한 경우\n" + \
             "홍 길동 님이 호출했습니다.\n" + \
             "그룹 이름 : 율도국\n" + \
-            "메세지 내용 : 안녕하세요" + \
+            "메세지 내용 : 오 아이즈원 티저 나왔다" + \
             '</i>'
 
   CMDLIST = "/kadd <...> : 알람을 받을 키워드를 설정합니다.\n" + \
@@ -41,14 +41,19 @@ class Message :
             "/gtoggle : 그룹별로 키워드 알림을 On/Off 합니다.\n" + \
             "/gdel : 이미 등록된 그룹을 삭제합니다.\n" + \
             "\n" + \
-            "/info : 봇 정보를 확인합니다."
+            "/info : 봇 정보를 확인합니다.\n" + \
+            "/howto : 봇 사용 방법을 확인합니다."
 
-  INFO = "서버가 없어서 비정기적으로 실행중입니다.\n" + \
-            "키워드는 구글 Firebase에 저장하고 있습니다.\n" + \
-            "암호화를 하지 않았습니다. 개인정보를 입력하지 마세요.\n" + \
-            "봇을 그룹 내에 참여시켜야만 작동하며, 그룹 내의 모든 채팅을 봇이 읽습니다.\n" + \
-            "키워드 알람이 발생한 대화를 제외한 어떤 대화 내용도 기록하지 않습니다.\n" + \
-            'Github : <a href="https://github.com/gincheong/telegram-notification-bot">gincheong</a>'
-  
-  WARN = "알림을 활성화시킬 그룹에 봇을 초대하고, 그룹 내 채팅으로 봇에게 /start 명령어를 입력하세요.\n" + \
-            "/help 로 명령어 목록을 볼 수 있습니다."
+  HOWTO = "카카오톡의 키워드 알림 기능을 본따 만들었습니다.\n" + \
+          "1. 키워드 알림을 활성화할 그룹 채팅에 봇을 초대합니다.\n" + \
+          "2. <b>그룹 내 채팅으로</b> 봇에게 /start 명령어를 입력해 그룹 알림을 활성화합니다.\n" + \
+          "3. <b>봇과의 개인 대화로</b> 키워드를 등록합니다."
+
+  INFO = "2019년 3월 29일부터 AWS EC2로 실행하고 있습니다.\n" + \
+          "데이터는 Google Firebase에 저장합니다.\n" + \
+          "데이터는 암호화하지 않고 저장하므로 개인정보를 입력하지 마세요.\n" + \
+          "알림 기능을 위해 봇이 그룹 채팅의 메시지에 접근 권한을 가지고 있습니다.\n" + \
+          "키워드 알림이 발생한 대화를 제외한 어떤 대화 내용도 기록하지 안흡니다.\n" + \
+          'Github : <a href="https://github.com/gincheong/telegram-notification-bot">gincheong</a>' + \n
+          "Telegram : @gincheong\n" + \
+          "2019.03.29"
