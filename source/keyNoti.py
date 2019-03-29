@@ -49,7 +49,7 @@ class keyNotiBot :
 
     self.cmdHandler(CMD.HELP, self.showHelp)
     self.cmdHandler(CMD.INFO, self.showInfo)
-    self.cmdHandler(CMD.HOWTO, self,showHowto)
+    self.cmdHandler(CMD.HOWTO, self.showHowto)
 
     self.cmdHandler(CMD.START, self.start)
 

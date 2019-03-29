@@ -24,7 +24,7 @@ class FirebaseURL :
 
 class Message :
   WELCOME = "원하는 그룹에 봇을 초대하고, 그룹 내 채팅으로 봇에게 /start 명령어를 입력하세요.\n" + \
-            "/howto 로 사용 방법, /help로 사용 가능한 명령어 목록을 볼 수 있습니다."
+            "/howto 로 사용 방법, /help 로 사용 가능한 명령어 목록을 볼 수 있습니다."
 
   PREVIEW = '<i>' + \
             "EX> 키워드로 '아이즈원' 을 등록한 경우\n" + \
@@ -54,6 +54,6 @@ class Message :
           "데이터는 암호화하지 않고 저장하므로 개인정보를 입력하지 마세요.\n" + \
           "알림 기능을 위해 봇이 그룹 채팅의 메시지에 접근 권한을 가지고 있습니다.\n" + \
           "키워드 알림이 발생한 대화를 제외한 어떤 대화 내용도 기록하지 안흡니다.\n" + \
-          'Github : <a href="https://github.com/gincheong/telegram-notification-bot">gincheong</a>' + \n
+          'Github : <a href="https://github.com/gincheong/telegram-notification-bot">gincheong</a>\n' + \
           "Telegram : @gincheong\n" + \
           "2019.03.29"
