@@ -73,6 +73,7 @@ class keyNotiBot :
   def start(self, bot, update) :
     if self.isPrivateMsg(update) == True : # 개인톡으로 start를 보내면 경고함
       update.message.reply_text(MSG.WELCOME)
+      update.message.reply_html(MSG.PREVIEW)
       return
 
     groupID = update.message.chat['id']
