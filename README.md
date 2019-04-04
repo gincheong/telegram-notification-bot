@@ -1,7 +1,6 @@
 # telegram-notification-bot
 텔레그램 키워드 알림 봇  
-@keywordNoti_bot  
-https://t.me/keywordNoti_bot
+[@keywordNoti_bot](https://t.me/keywordNoti_bot)  
 
 카카오톡의 키워드 알림 기능을 본따 만들었습니다.
 1. 키워드 알림을 활성화할 그룹 채팅에 봇을 초대합니다.
@@ -9,7 +8,7 @@ https://t.me/keywordNoti_bot
 3. <b>봇과의 개인 대화로</b> 키워드를 등록합니다.
 
 <b>Contact</b>  
-Telegram : @gincheong  
+Telegram : [@gincheong](https://t.me/gincheong)  
 EMAIL : gincheong2@gmail.com
 
 
