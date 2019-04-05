@@ -17,14 +17,12 @@ ON = 1
 OFF = 0
 
 class keyNotiBot :
-  def __init__(self) :
+  def __init__(self, token, key, url) :
     self.log = log.Log()
     self.log.info("000", "Program Start")
 
-    ###############################################
-    self.token = <BOT_TOKEN>
-    self.DB = DatabaseControl.DatabaseControl(<PATH/TO/KEY>, <FIREBASE_URL>, self.log)
-    ###############################################
+    self.token = token
+    self.DB = DatabaseControl.DatabaseControl(key, url, self.log)
 
     self.core = telegram.Bot(self.token)
     self.updater = Updater(self.token)
@@ -163,9 +161,10 @@ class keyNotiBot :
           for kvalue in kList :
             if kvalue in message.lower() :
               # 4. 해당 유저의 키워드가 사용되었는지 확인한다
-              notiMessage = "%s 님이 호출했습니다.\n그룹 이름 : %s\n메세지 내용 : %s" % (senderName, groupName, message)
+              notiMessage = "<i>%s</i> 님이 호출했습니다.\n그룹 이름 : <i>%s</i>\n메세지 내용 : <i>%s</i>" % (senderName, groupName, message)
 
-              self.core.send_message(uid, notiMessage, parse_mode=telegram.ParseMode.HTML)
+              self.core.send_message(uid, notiMessage, parse_mode=telegram.ParseMode.HTML, disable_web_page_preivew=True)
+
               self.log.info(uid, "알림 전송 : " + senderID + '/' + senderName + '/' + groupID + '/' + groupName + '/' + message)
 
               if groupName is not gdata['gname'] :
@@ -174,7 +173,3 @@ class keyNotiBot :
                 # 갱신작업
 
               break
-
-if __name__ == "__main__":
-    knoti = keyNotiBot()
-    knoti.boot()
