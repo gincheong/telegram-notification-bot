@@ -50,6 +50,8 @@ class keyNotiBot :
     self.cmdHandler(CMD.HOWTO, self.showHowto)
 
     self.cmdHandler(CMD.START, self.start)
+    self.cmdHandler(CMD.DISABLE, self.disableNotification)
+    self.cmdHandler(CMD.ENABLE, self.enableNotification)
 
     self.msgHandler(self.getMessage)
   
@@ -95,6 +97,11 @@ class keyNotiBot :
       self.log.warn(userID, "등록된 그룹 추가 시도 : " + str(groupID))
       update.message.reply_text("이미 등록된 그룹입니다.\n기타 명령은 봇과의 개인 대화에서만 작동합니다.")
 
+    notiState = self.DB.get(userID, URL.USER + userID_URL + URL.CONFIG)
+
+    if notiState == None :
+      self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : ON })    
+
   def showHelp(self, bot, update) :
     if self.isPrivateMsg(update) == False :
       # 개인 메세지가 아니면 실행안함
@@ -111,6 +118,29 @@ class keyNotiBot :
     if self.isPrivateMsg(update) == False :
       return
     update.message.reply_html(MSG.HOWTO)
+
+  def enableNotification(self, bot, update) :
+    if self.isPrivateMsg(update) == False :
+      return
+      
+    userID = update.message.chat['id']
+    userID_URL = '/' + str(userID)
+
+    self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : ON })
+    update.message.reply_text("전체 키워드 알림을 ON합니다.")
+    self.log.info(userID, "전체 알림 ON 설정")
+
+  def disableNotification(self, bot, update) :
+    if self.isPrivateMsg(update) == False :
+      return
+    
+    userID = update.message.chat['id']
+    userID_URL = '/' + str(userID)
+    
+    self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : OFF })
+    update.message.reply_text("전체 키워드 알림을 OFF합니다.")
+    self.log.info(userID, "전체 알림 OFF 설정")
+
 
   # 그룹 메세지를 읽어서 키워드를 확인하는 함수
   def getMessage(self, bot, update) : 
@@ -142,6 +172,9 @@ class keyNotiBot :
     for uid, udata in allUser.items() :
       if uid == senderID :
         continue # 메세지 보낸 당사자에게는 알리지 않는다.
+
+      if udata['config']['notification'] == OFF :
+        continue # 전체 알람 설정을 OFF한 상태면 알리지 않는다.
 
       try :
         kList = list(udata['keyword'].values())
