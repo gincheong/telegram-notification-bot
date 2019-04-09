@@ -1,5 +1,7 @@
 import telegram
 import os
+# import multiprocessing
+# from functools import partial
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 import log
@@ -7,6 +9,7 @@ import DatabaseControl
 from constants import Command as CMD
 from constants import FirebaseURL as URL
 from constants import Message as MSG
+from constants import Bool as B
 
 class Keyword :
   def __init__(self, DB, log) :
@@ -19,6 +22,14 @@ class Keyword :
       return True
     else :
       return False
+
+  def getFullname(self, update) : # 한국처럼 성이 앞으로 간다
+    try :
+      fullName = update.message.from_user['last_name'] + " " + update.message.from_user['first_name']
+    except : # last name을 등록 안 하는 경우
+      fullName = update.message.from_user['first_name']
+
+    return fullName
 
   def keywordAdd(self, bot, update) :
     if self.isPrivateMsg(update) == False :
@@ -87,6 +98,56 @@ class Keyword :
     except :
       update.message.reply_text("등록된 키워드가 없습니다.")
 
+  def keywordFind(self, bot, messageData, allUserData) :
 
+    for uid, udata in allUserData.items() :
+      notificationState = udata['config']['notification']
 
+      if (uid == messageData['senderID']) or (notificationState == B.OFF) :
+        continue # 당사자이거나, 알람이 꺼진 사용자 스킵
 
+      try :
+        kList = list(udata['keyword'].values())
+        gDict = udata['group'].items()
+      except :
+        continue
+        # 키워드 등록을 안 한 사용자
+
+      for item in gDict :
+        gid, gdata = item
+        # 사용자 DB에 저장된 그룹 데이터
+
+        if (gid == messageData['groupID']) and gdata['alarm'] == B.ON :
+          # 2. 그룹에 속한 유저 검색
+          # 3. 그룹 알림을 켰는지 확인
+
+          for kvalue in kList :
+            if kvalue in messageData['text'].lower() :
+              # 4. 키워드 사용 확인
+
+              notiMessage = "<i>%s</i> 님이 호출했습니다.\n그룹 이름 : <i>%s</i>\n메세지 내용 : <i>%s</i>" % (messageData['senderName'], messageData['groupName'], messageData['text'])
+              
+              bot.send_message(uid, notiMessage, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+              self.log.info(uid, "알림 전송 : " + messageData['senderID'] + '/' + messageData['senderName'] + '/' + messageData['groupID'] + '/' + messageData['groupName'] + '/' + messageData['text'])
+
+              if messageData['groupName'] is not gdata['gname'] :
+                # 그룹 이름을 못 찾는다 -> 그룹명이 바뀌었는데 갱신 안됨
+                self.DB.update(uid, URL.USER + '/' + str(uid) + URL.GROUP + '/' + str(gid), { 'gname' : messageData['groupName'] }) # 갱신함
+
+              break # 동일 사용자의 키워드가 여러 번 사용돼도 한 번만 알림
+
+  def checkMessage(self, bot, update) :
+    if self.isPrivateMsg(update) == True :
+      return
+      # 개인 메세지로 온 것은 무시함
+
+    messageData = dict()
+    messageData['text'] = update.message.text
+    messageData['senderID'] = str(update.message.from_user['id'])
+    messageData['groupID'] = str(update.message.chat['id']) # 어느 그룹인지 체크
+    messageData['groupName'] = update.message.chat['title']
+    messageData['senderName'] = self.getFullname(update)
+
+    allUserData = self.DB.get('CHECKMESSAGE', URL.USER)
+
+    self.keywordFind(bot, messageData, allUserData)

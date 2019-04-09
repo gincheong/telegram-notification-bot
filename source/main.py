@@ -7,4 +7,3 @@ if __name__ == "__main__":
   firebaseURL = <FIREBASE_URL>
 
   keyNoti.keyNotiBot(bot_token, serviceAccountKey, firebaseURL).boot()
-  

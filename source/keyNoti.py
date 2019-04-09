@@ -10,11 +10,9 @@ import groupMethod
 from constants import Command as CMD
 from constants import FirebaseURL as URL
 from constants import Message as MSG
+from constants import Bool as B
 
 # /setprivacy DISABLED # 명령이 아닌 그룹 메세지에도 반응
-
-ON = 1
-OFF = 0
 
 class keyNotiBot :
   def __init__(self, token, key, url) :
@@ -44,6 +42,7 @@ class keyNotiBot :
     self.cmdHandler(CMD.KADD, k.keywordAdd)
     self.cmdHandler(CMD.KLIST, k.keywordList)
     self.cmdHandler(CMD.KDELETE, k.keywordDelete)
+    self.msgHandler(k.checkMessage)
 
     self.cmdHandler(CMD.HELP, self.showHelp)
     self.cmdHandler(CMD.INFO, self.showInfo)
@@ -52,8 +51,6 @@ class keyNotiBot :
     self.cmdHandler(CMD.START, self.start)
     self.cmdHandler(CMD.DISABLE, self.disableNotification)
     self.cmdHandler(CMD.ENABLE, self.enableNotification)
-
-    self.msgHandler(self.getMessage)
   
   def isPrivateMsg(self, update) :
     if update.message.chat['type'] == 'private' :
@@ -85,7 +82,7 @@ class keyNotiBot :
     groupList = self.DB.get(userID, URL.USER + userID_URL + URL.GROUP)
     
     if groupList == None or str(groupID) not in groupList.keys()  : # 신규등록
-      self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'alarm' : ON })
+      self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'alarm' : B.ON })
       self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'gname' : groupName })
 
       self.log.info(userID, "그룹 추가 : " + str(groupID))
@@ -100,7 +97,7 @@ class keyNotiBot :
     notiState = self.DB.get(userID, URL.USER + userID_URL + URL.CONFIG)
 
     if notiState == None :
-      self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : ON })    
+      self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : B.ON })    
 
   def showHelp(self, bot, update) :
     if self.isPrivateMsg(update) == False :
@@ -126,7 +123,7 @@ class keyNotiBot :
     userID = update.message.chat['id']
     userID_URL = '/' + str(userID)
 
-    self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : ON })
+    self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : B.ON })
     update.message.reply_text("전체 키워드 알림을 ON합니다.")
     self.log.info(userID, "전체 알림 ON 설정")
 
@@ -137,72 +134,6 @@ class keyNotiBot :
     userID = update.message.chat['id']
     userID_URL = '/' + str(userID)
     
-    self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : OFF })
+    self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : B.OFF })
     update.message.reply_text("전체 키워드 알림을 OFF합니다.")
     self.log.info(userID, "전체 알림 OFF 설정")
-
-
-  # 그룹 메세지를 읽어서 키워드를 확인하는 함수
-  def getMessage(self, bot, update) : 
-    if self.isPrivateMsg(update) == True :
-      # 봇에게 보낸 개인 메세지면 무시함
-      return
-    
-    '''
-    1. 어느 그룹인지 확인한다
-    2. db에서 해당 그룹에 속한 유저를 조회한다
-    #. 보낸 사람은 유저 목록에서 제외해야함
-    3. 해당 그룹의 알람이 켜져있는지 확인한다
-    4. 해당 유저의 키워드가 사용되었는지 확인한다
-    5. 알림을 보낸다
-    '''
-    message = update.message.text
-    senderID = str(update.message.from_user['id'])
-    groupID = str(update.message.chat['id'])
-    groupName = update.message.chat['title']
-    # 1. 그룹을 확인한다
-    
-    try :
-      senderName = update.message.from_user['last_name'] + " " + update.message.from_user['first_name']
-    except : # last name을 등록 안 하는 경우
-      senderName = update.message.from_user['first_name']
-
-    allUser = self.DB.get('000', URL.USER)
-
-    for uid, udata in allUser.items() :
-      if uid == senderID :
-        continue # 메세지 보낸 당사자에게는 알리지 않는다.
-
-      if udata['config']['notification'] == OFF :
-        continue # 전체 알람 설정을 OFF한 상태면 알리지 않는다.
-
-      try :
-        kList = list(udata['keyword'].values())
-        gDict = udata['group'].items() # 사용자에게 등록된 그룹들
-      except :
-        continue # 키워드를 등록 안 한 사용자
-
-      for item in gDict : 
-        gid, gdata = item
-        # 사용자 DB에 저장된 그룹 데이터
-        # gid(alarm, gname)
-        
-        if groupID == gid and gdata['alarm'] == ON :
-          # 2. 해당 그룹에 속한 유저를 찾는다.
-          # 3. 해당 그룹의 알람이 켜져있는지 확인한다
-
-          for kvalue in kList :
-            if kvalue in message.lower() :
-              # 4. 해당 유저의 키워드가 사용되었는지 확인한다
-              notiMessage = "<i>%s</i> 님이 호출했습니다.\n그룹 이름 : <i>%s</i>\n메세지 내용 : <i>%s</i>" % (senderName, groupName, message)
-
-              self.core.send_message(uid, notiMessage, parse_mode=telegram.ParseMode.HTML, disable_web_page_preivew=True)
-
-              self.log.info(uid, "알림 전송 : " + senderID + '/' + senderName + '/' + groupID + '/' + groupName + '/' + message)
-
-              if groupName is not gdata['gname'] :
-                # DB에 저장된 그룹이름과 맞지 않으면(그룹명이 갱신된 경우)
-                self.DB.update(uid, URL.USER + '/' + str(uid) + URL.GROUP + '/' + str(gid), { 'gname' : groupName })
-                # 갱신작업
-
-              break
