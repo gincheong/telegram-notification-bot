@@ -128,6 +128,13 @@ class Group :
       update.message.reply_text("등록된 그룹이 없습니다.")
       return
 
+    alarmState = list()
+    for i in range(numberOfGroup) :
+      if groupDict[groupList[i]]['alarm'] == B.ON :
+        alarmState.append("ON")
+      elif groupDict[groupList[i]]['alarm'] == B.OFF :
+        alarmState.append("OFF")
+
     msg = "등록된 그룹 목록입니다."
     if userInput == ('/' + CMD.GDELETE) :
       for i in range(numberOfGroup) :
@@ -150,6 +157,6 @@ class Group :
 
         self.DB.delete(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL)
         update.message.reply_html("<b>" + groupName + "</b> 그룹을 삭제했습니다.")
-        self.log.info(userID, "그룹 삭제 : " + str(groupID))
+        self.log.info(userID, "그룹 삭제 : " + str(groupList[groupNo]))
       else :
         update.message.reply_text("유효하지 않은 번호입니다.")

@@ -28,7 +28,7 @@ class Log :
     log.close()
 
   def error(self, uid, text) :
-    log = openFile(self.updateTimeStamp())
+    log = self.openFile(self.updateTimeStamp())
     log.write(self.timestamp + " [ERROR] (" + str(uid) + ") " + str(text))
     log.flush()
     log.close()
