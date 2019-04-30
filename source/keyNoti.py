@@ -69,8 +69,11 @@ class keyNotiBot :
   # userFunc
   def start(self, bot, update) :
     if self.isPrivateMsg(update) == True : # 개인톡으로 start를 보내면 경고함
+      # 봇 최초 실행 시에 이리로 오는 것이기도 함
       update.message.reply_text(MSG.WELCOME)
       update.message.reply_html(MSG.PREVIEW)
+      update.message.reply_text(MSG.WARN)
+      
       return
 
     groupID = update.message.chat['id']

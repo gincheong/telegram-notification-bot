@@ -4,6 +4,8 @@ import os
 # from functools import partial
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
+import traceback
+
 import log
 import DatabaseControl
 from constants import Command as CMD
@@ -101,7 +103,13 @@ class Keyword :
   def keywordFind(self, bot, messageData, allUserData) :
 
     for uid, udata in allUserData.items() :
-      notificationState = udata['config']['notification']
+      try :
+        notificationState = udata['config']['notification']
+        # 그룹에 /start 하지 않으면 'config'가 정의되지 않는데
+        # 그 부분을 수정해야 함, 지금은 임시로 except로 뺀 상태
+        # 아니면 굳이 오류처리 안 해도 될ㄹ 것도 같고
+      except :
+        continue
 
       if (uid == messageData['senderID']) or (notificationState == B.OFF) :
         continue # 당사자이거나, 알람이 꺼진 사용자 스킵
@@ -127,6 +135,7 @@ class Keyword :
 
               notiMessage = "<i>%s</i> 님이 호출했습니다.\n그룹 이름 : <i>%s</i>\n메세지 내용 : <i>%s</i>" % (messageData['senderName'], messageData['groupName'], messageData['text'])
               
+              self.log.info(uid, "알림 전송 시도")
               bot.send_message(uid, notiMessage, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
               self.log.info(uid, "알림 전송 : " + messageData['senderID'] + '/' + messageData['senderName'] + '/' + messageData['groupID'] + '/' + messageData['groupName'] + '/' + messageData['text'])
 
