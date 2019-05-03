@@ -137,7 +137,8 @@ class Keyword :
               
               self.log.info(uid, "알림 전송 시도")
               bot.send_message(uid, notiMessage, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
-              self.log.info(uid, "알림 전송 : " + messageData['senderID'] + '/' + messageData['senderName'] + '/' + messageData['groupID'] + '/' + messageData['groupName'] + '/' + messageData['text'])
+
+              self.log.info(uid, "알림 전송 : " + messageData['senderID'] + '/' + messageData['senderName'] + '/' + messageData['groupID'] + '/' + messageData['groupName'] + '/' + messageData['messageID'])
 
               if messageData['groupName'] is not gdata['gname'] :
                 # 그룹 이름을 못 찾는다 -> 그룹명이 바뀌었는데 갱신 안됨
@@ -152,6 +153,7 @@ class Keyword :
 
     messageData = dict()
     messageData['text'] = update.message.text
+    messageData['messageID'] = update.message.message_id
     messageData['senderID'] = str(update.message.from_user['id'])
     messageData['groupID'] = str(update.message.chat['id']) # 어느 그룹인지 체크
     messageData['groupName'] = update.message.chat['title']
