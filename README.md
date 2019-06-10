@@ -9,8 +9,8 @@
 
 <b>Contact</b>  
 Telegram : [@gincheong](https://t.me/gincheong)  
-EMAIL : gincheong2@gmail.com
-
+EMAIL : gincheong2@gmail.com  
+Blog : [Tistory](https://desree.tistory.com/33)
 
 python-telegram-bot 11.1.0 (LGPLv3.0)  
 firebase_admin 2.16.0 (Apache2.0)  
