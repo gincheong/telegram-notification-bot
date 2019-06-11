@@ -53,7 +53,7 @@ class Keyword :
         self.DB.push(userID, URL.USER + '/' + str(userID) + URL.KEYWORD, newKeyword)
 
         self.log.info(userID, "키워드 추가 : " + newKeyword)
-        update.message.reply_html("<b>" + newKeyword + "</b> 키워드를 추가했습니다.")
+        update.message.reply_text(newKeyword + " 키워드를 추가했습니다.")
       else :
         update.message.reply_text("이미 등록된 키워드입니다.")
 
@@ -82,7 +82,7 @@ class Keyword :
             self.DB.delete(userID, URL.USER + userID_URL + URL.KEYWORD + '/' + key)
             break
         
-        update.message.reply_html("<b>" + deleteKeyword + "</b> 키워드를 삭제했습니다.")
+        update.message.reply_text(deleteKeyword + " 키워드를 삭제했습니다.")
         self.log.info(userID, "키워드 삭제 : " + deleteKeyword)
 
   def keywordList(self, bot, update) :
@@ -95,8 +95,8 @@ class Keyword :
     keywordDict = self.DB.get(userID, URL.USER + userID_URL + URL.KEYWORD)
 
     try :
-      update.message.reply_html("등록된 키워드 목록입니다.\n" + \
-            "<b>" + ", ".join(keywordDict.values()) + "</b>")
+      update.message.reply_text("등록된 키워드 목록입니다.\n" + \
+             ", ".join(keywordDict.values()))
     except :
       update.message.reply_text("등록된 키워드가 없습니다.")
 
@@ -133,10 +133,10 @@ class Keyword :
             if kvalue in messageData['text'].lower() :
               # 4. 키워드 사용 확인
 
-              notiMessage = "<i>%s</i> 님이 호출했습니다.\n그룹 이름 : <i>%s</i>\n메세지 내용 : <i>%s</i>" % (messageData['senderName'], messageData['groupName'], messageData['text'])
+              notiMessage = "%s 님이 호출했습니다.\n그룹 이름 : %s\n메세지 내용 : %s" % (messageData['senderName'], messageData['groupName'], messageData['text'])
               
               self.log.info(uid, "알림 전송 시도")
-              bot.send_message(uid, notiMessage, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+              bot.send_message(uid, notiMessage, disable_web_page_preview=True)
 
               self.log.info(uid, "알림 전송 : " + messageData['senderID'] + '/' + messageData['senderName'] + '/' + messageData['groupID'] + '/' + messageData['groupName'] + '/' + messageData['messageID'])
 
@@ -153,7 +153,7 @@ class Keyword :
 
     messageData = dict()
     messageData['text'] = update.message.text
-    messageData['messageID'] = update.message.message_id
+    messageData['messageID'] = str(update.message.message_id)
     messageData['senderID'] = str(update.message.from_user['id'])
     messageData['groupID'] = str(update.message.chat['id']) # 어느 그룹인지 체크
     messageData['groupName'] = update.message.chat['title']
