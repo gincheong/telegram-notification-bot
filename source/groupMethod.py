@@ -70,14 +70,14 @@ class Group :
           self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'alarm' : B.OFF })
 
           self.log.info(userID, str(groupList[i]) + "의 알림을 OFF로 변경")
-          update.message.reply_html("<b>" + groupName + "</b> 그룹의 알림을 OFF했습니다.")
+          update.message.reply_text(groupName + " 그룹의 알림을 OFF했습니다.")
         elif alarmState[groupNo] == "OFF" :
           groupID_URL = '/' + str(groupList[groupNo])
           
           self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'alarm' : B.ON })
           
           self.log.info(userID, str(groupList[i]) + "의 알림을 ON으로 변경")
-          update.message.reply_html("<b>" + groupName + "</b> 그룹의 알림을 ON했습니다.")
+          update.message.reply_text(groupName + " 그룹의 알림을 ON했습니다.")
       else :
         update.message.reply_text("유효하지 않은 번호입니다.")
 
@@ -156,7 +156,7 @@ class Group :
         groupName = groupDict[groupList[groupNo]]['gname']
 
         self.DB.delete(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL)
-        update.message.reply_html("<b>" + groupName + "</b> 그룹을 삭제했습니다.")
+        update.message.reply_text(groupName + " 그룹을 삭제했습니다.")
         self.log.info(userID, "그룹 삭제 : " + str(groupList[groupNo]))
       else :
         update.message.reply_text("유효하지 않은 번호입니다.")

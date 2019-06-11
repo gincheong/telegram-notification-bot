@@ -36,13 +36,13 @@ class Message :
             "메세지 내용 : 밥 먹으러 갈 사람?" + \
             '</i>'
 
-  CMDLIST = "/kadd <키워드> : 알람을 받을 키워드를 설정합니다.\n" + \
-            "/kdel <키워드> : 등록된 키워드를 삭제합니다.\n" + \
+  CMDLIST = "/kadd 키워드 : 알람을 받을 키워드를 설정합니다.\n" + \
+            "/kdel 키워드 : 등록된 키워드를 삭제합니다.\n" + \
             "/klist : 설정한 키워드 목록을 확인합니다.\n" + \
             "\n" + \
             "/glist : 사용자에게 등록된 그룹 목록을 확인합니다.\n" + \
-            "/gtoggle <번호> : 그룹별로 키워드 알림을 ON/OFF 합니다.\n" + \
-            "/gdel <번호> : 이미 등록된 그룹을 삭제합니다.\n" + \
+            "/gtoggle 번호 : 그룹별로 키워드 알림을 ON/OFF 합니다.\n" + \
+            "/gdel 번호 : 이미 등록된 그룹을 삭제합니다.\n" + \
             "\n" + \
             "/enable, /disable : 봇 전체 알림을 ON/OFF 합니다.\n" + \
             "/info : 봇 정보를 확인합니다.\n" + \
@@ -59,6 +59,7 @@ class Message :
           "알림 기능을 위해 봇이 그룹 채팅의 메시지에 접근 권한을 가지고 있습니다.\n" + \
           'Github : <a href="https://github.com/gincheong/telegram-notification-bot">telegram-notification-bot</a>\n' + \
           "Telegram : @gincheong\n" + \
-          "2019.03.29"
+          "2019.05.30\n" + \
+          "봇 메세지의 html 속성을 제거했습니다. 이제 괄호를 포함한 키워드를 사용할 수 있습니다."
 
   UPDATELOG = ""
