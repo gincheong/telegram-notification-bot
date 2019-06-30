@@ -136,7 +136,11 @@ class Keyword :
               notiMessage = "%s 님이 호출했습니다.\n그룹 이름 : %s\n메세지 내용 : %s" % (messageData['senderName'], messageData['groupName'], messageData['text'])
               
               self.log.info(uid, "알림 전송 시도")
-              bot.send_message(uid, notiMessage, disable_web_page_preview=True)
+              try :
+                bot.send_message(uid, notiMessage, disable_web_page_preview=True)
+              except Exception as e :
+                self.log.error(uid, "알림 전송 실패")
+                self.log.error(uid, str(e))
 
               self.log.info(uid, "알림 전송 : " + messageData['senderID'] + '/' + messageData['senderName'] + '/' + messageData['groupID'] + '/' + messageData['groupName'] + '/' + messageData['messageID'])
 
