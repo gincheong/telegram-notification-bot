@@ -1,7 +1,7 @@
 # telegram-notification-bot
 텔레그램 키워드 알림 봇  
-~~[@keywordNoti_bot](https://t.me/keywordNoti_bot)  ~~
-[@keyNoti_bot](https://t.me/keyNoti_bot) 2019.07.14에 원인모를 이유로 봇이 삭제되어 새로 생성
+~~@keywordNoti_bot~~  
+[@keyNoti_bot](https://t.me/keyNoti_bot) (2019.07.14에 원인모를 이유로 봇이 삭제되어 새로 생성)
 
 
 카카오톡의 키워드 알림 기능을 본따 만들었습니다.
