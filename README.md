@@ -2,10 +2,7 @@
 텔레그램 키워드 알림 봇  
 Telegram Keyword Notification Bot  
 
-~~@keywordNoti_bot~~  
-~~[@keyNoti_bot](https://t.me/keyNoti_bot) (2019.07.14에 원인모를 이유로 봇이 삭제되어 새로 생성)~~  
-
-복구되었습니다.  
+~~[@keyNoti_bot](https://t.me/keyNoti_bot)~~  
 [@keywordNoti_bot](https://t.me/keywordNoti_bot) 
 
 
@@ -16,8 +13,8 @@ Telegram Keyword Notification Bot
   
 How To Use it
 1. Add bot to the group that you want to get keyword notification.
-2. Send '/start' command to bot <b>in the group chat</b> to add group for bot.
-3. Add keywords <b>in private chat with the bot</b>. '/help' show avaliable commands.
+2. Send '/start' command to bot <b>in the group chat</b> to add group to bot's database.
+3. Add keywords <b>in a private chat with the bot</b>. '/help' show avaliable commands.
 ###### I'm Korean, so i developed this bot in korean. But notification function is apply for all languages.<br>If you want to use this bot, you can DM to me. I can explain you how to use it. (in poor English...)
 <br>
 
