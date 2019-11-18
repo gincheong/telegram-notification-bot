@@ -54,12 +54,10 @@ class Message :
           "3. <b>봇과의 개인 대화로</b> 키워드를 등록합니다."
 
   INFO = "2019년 3월 29일부터 AWS에서 실행되고 있습니다.\n" + \
-          "데이터는 Google Firebase에 저장합니다.\n" + \
-          "키워드 데이터는 암호화하지 않고 저장하므로 개인정보를 입력하지 마세요.\n" + \
-          "알림 기능을 위해 봇이 그룹 채팅의 메시지에 접근 권한을 가지고 있습니다.\n" + \
+          "키워드 데이터는 암호화하지 않고 저장하므로 중요한 개인정보를 입력하지 마세요.\n" + \
           'Github : <a href="https://github.com/gincheong/telegram-notification-bot">telegram-notification-bot</a>\n' + \
           "Telegram : @gincheong\n" + \
-          "2019.05.30\n" + \
-          "봇 메세지의 html 속성을 제거했습니다. 이제 괄호를 포함한 키워드를 사용할 수 있습니다."
+          "2019.11.18\n" + \
+          "유료 요금제 DB를 사용 중이나, 사용량 증가로 인해 11월 중에 알람이 제한될 수 있습니다."
 
   UPDATELOG = ""

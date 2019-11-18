@@ -135,8 +135,15 @@ class Keyword :
 
               notiMessage = "%s 님이 호출했습니다.\n그룹 이름 : %s\n메세지 내용 : %s" % (messageData['senderName'], messageData['groupName'], messageData['text'])
               
+              # Firebase 용량 건으로 추가 메시지 작성
+              warn_from_1118 = "사용 중인 데이터베이스의 요금제 용량 문제로 11월 중에 알람 기능이 작동하지 않을 수 있습니다.\n" + \
+                               "주말에 개선 작업을 할 예정입니다.\n" + \
+                               "이 메세지는 11월 18일부터 표시되며, 업데이트 후 제거됩니다.\n" +\
+                               "DM : @gincheong"
+
               self.log.info(uid, "알림 전송 시도")
               try :
+                bot.send_message(uid, warn_from_1118, disable_notification=True)
                 bot.send_message(uid, notiMessage, disable_web_page_preview=True)
               except Exception as e :
                 self.log.error(uid, "알림 전송 실패")
