@@ -125,7 +125,7 @@ class Keyword :
     # fix : notification 값으로 전역 알람 설정 꺼버림
     message = update.message.text
     messageID = str(update.message.message_id)
-    senderID = str(update.mesage.from_user['id'])
+    senderID = str(update.message.from_user['id'])
     senderName = self.getFullname(update)
     groupID = str(update.message.chat['id'])
     groupName = update.message.chat['title']
@@ -142,6 +142,10 @@ class Keyword :
     # 그룹이 있는 경우
     for groupUserID in groupUserDict.values() :
       # 그룹 안에 있는 사용자들을 대상으로..
+
+      if groupUserID == senderID :
+        # 자기 자신의 데이터는 보지 않는다.
+        continue
 
       each_userKeyword = self.DB.get('CheckMessage', URL.USER + '/' + str(groupUserID) + URL.KEYWORD)
       # 해당 사용자의 키워드 데이터를 가져온다.
