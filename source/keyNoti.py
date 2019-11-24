@@ -62,10 +62,10 @@ class keyNotiBot :
   def boot(self) :
     self.log.info("000", "Bot Start")
     self.initHandler() # 명령어를 활성화시킨다.
+    print('bot started')
 
     self.updater.start_polling()
     self.updater.idle()
-    print("bot started") # 콘솔에서 실행확인 위한 출력
   
   # userFunc
   def start(self, bot, update) :
@@ -97,6 +97,15 @@ class keyNotiBot :
 
       # 사용자가 그룹에 등록되어 있는지 확인..
       savedGroupUser = self.DB.get(userID, URL.GROUP + '/' + groupID + URL.USER)
+      
+      if savedGroupUser == None :
+        # 해당 그룹에 등록자가 하나도 없는 경우, 그룹ID만 껍데기로 존재
+        self.DB.push(userID, URL.GROUP + '/' + groupID + URL.USER, userID)
+        # 새로 추가함
+        self.log.info(userID, "그룹 추가 : " + groupID)
+        update.message.reply_text("현재 그룹을 키워드 알림 봇에 등록합니다.\n기타 명령은 봇과의 개인 대화에서만 작동합니다.")
+        return
+
       if userID not in savedGroupUser.values() :
         # /start 입력한 사용자 ID가 그룹 내 사용자 목록에 없으면
         self.DB.push(userID, URL.GROUP + '/' + groupID + URL.USER, userID)

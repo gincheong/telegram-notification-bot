@@ -67,13 +67,14 @@ class Group :
       return
     
     # 그룹이 등록은 되어있는데
-    for key, val in groupDict['user'] :
+    for key, val in groupDict['user'].items() :
       if val == userID :
         # 해당 그룹에 등록된 사용자 목록에 현재 사용자가 있으면
         self.DB.delete(userID, URL.GROUP + '/' + groupID + URL.USER + '/' + key)
         # 키 값으로 데이터 삭제
         update.message.reply_text("현재 그룹을 등록 해제했습니다.")
         self.log.info(userID, "그룹 삭제 : " + str(groupID))
+        break
       else :
         # 목록에 현재 사용자가 없으면
         update.message.reply_text("등록되지 않은 그룹입니다.")
