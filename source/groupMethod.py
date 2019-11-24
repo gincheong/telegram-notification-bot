@@ -21,142 +21,59 @@ class Group :
     else :
       return False
 
-  def groupToggle(self, bot, update) :
-    if self.isPrivateMsg(update) == False :
-      # 개인 메세지가 아니면 실행 안함
-      return
-    
-    userInput = update.message.text
-    userID = update.message.chat['id']
-    userID_URL = '/' + str(userID)
-
-    groupDict = self.DB.get(userID, URL.USER + userID_URL + URL.GROUP)
-    try :
-      groupList = list(groupDict)
-      numberOfGroup = len(groupList)
-    except :
-      update.message.reply_text("등록된 그룹이 없습니다.")
-      return
-
-    alarmState = list()
-    for i in range(numberOfGroup) :
-      if groupDict[groupList[i]]['alarm'] == B.ON :
-        alarmState.append("ON")
-      elif groupDict[groupList[i]]['alarm'] == B.OFF :
-        alarmState.append("OFF")
-    
-    msg = "등록된 그룹 목록입니다."
-    if userInput == ("/" + CMD.GTOGGLE) : # 아무 키워드도 입력하지 않음
-      for i in range(numberOfGroup) :
-        msg += '\n' + str(i) + '. ' + groupDict[groupList[i]]['gname'] + ' : ' + alarmState[i]
-      update.message.reply_text(msg)
-      update.message.reply_text("알람을 활성화/비활성화 하려는 그룹의 번호를 같이 입력해 주세요.\n" + \
-            "ex> /gtoggle 1 (1번 그룹의 알람 활성화/비활성화)")
-    else : # 내용을 입력받은 경우
-      groupNo = userInput[len(CMD.GTOGGLE) + 2 : ].strip()
-
-      try :
-        groupNo = int(groupNo) # 정수인지 확인
-      except :
-        update.message.reply_text("잘못된 입력입니다.")
-        return
-
-      if groupNo < numberOfGroup : # 유효한 번호인가
-        groupName = groupDict[groupList[groupNo]]['gname']
-
-        if alarmState[groupNo] == "ON" :
-          groupID_URL = '/' + str(groupList[groupNo])
-
-          self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'alarm' : B.OFF })
-
-          self.log.info(userID, str(groupList[i]) + "의 알림을 OFF로 변경")
-          update.message.reply_text(groupName + " 그룹의 알림을 OFF했습니다.")
-        elif alarmState[groupNo] == "OFF" :
-          groupID_URL = '/' + str(groupList[groupNo])
-          
-          self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'alarm' : B.ON })
-          
-          self.log.info(userID, str(groupList[i]) + "의 알림을 ON으로 변경")
-          update.message.reply_text(groupName + " 그룹의 알림을 ON했습니다.")
-      else :
-        update.message.reply_text("유효하지 않은 번호입니다.")
-
   def groupList(self, bot, update) :
     if self.isPrivateMsg(update) == False :
       # 개인 메세지가 아니면 실행 안함
       return
 
     userID = update.message.chat['id']
-    userID_URL = '/' + str(userID)
 
-    groupDict = self.DB.get(userID, URL.USER + userID_URL + URL.GROUP)
+    # 1124 new code
+    userID = str(update.message.chat['id'])
+    groupDict = self.DB.get(userID, URL.GROUP)
+    groupList = list(groupDict)
+    # 등록된 전체 그룹 목록을 가져오기
+    # 용량낭비지만 어쩔수없음 이부분은
 
-    try :
-      groupList = list(groupDict)
-      numberOfGroup = len(groupList)
-    except :
-      update.message.reply_text("등록된 그룹이 없습니다.")
-      return
-    
-    alarmState = list()
-    for i in range(numberOfGroup) :
-      if groupDict[groupList[i]]['alarm'] == B.ON :
-        alarmState.append("ON")
-      elif groupDict[groupList[i]]['alarm'] == B.OFF :
-        alarmState.append("OFF")
+    userGroupList = list()
+    for groupID in groupList :
+      # 등록된 각 그룹 아이디에 대해서
+      groupUserDict = self.DB.get(userID, URL.GROUP + '/' + groupID + '/' + URL.USER)
+      if userID in groupUserDict.values() :
+        # 그룹의 사용자 목록에 포함되어 있으면
+        userGroupName = self.DB.get(userID, URL.GROUP + '/' + groupID + '/' + URL.INFO)['groupname']
+        userGroupList.append(userGroupName)
+        # 해당 그룹의 이름을 리스트에 추가
 
-    msg = "등록된 그룹 목록입니다."
-    for i in range(numberOfGroup) :
-      msg += '\n' + str(i) + '. ' + groupDict[groupList[i]]['gname'] + ' : ' + alarmState[i]
-    update.message.reply_text(msg)
+    message = "등록된 그룹 목록입니다."
+    for name in userGroupList :
+      message += '\n' + name
+    update.message.reply_text(message)
 
   def groupDelete(self, bot, update) :
-    if self.isPrivateMsg(update) == False :
-      # 개인 메세지가 아니면 실행 안함
+    if self.isPrivateMsg(update) == True :
+      # 개인 메시지로 작동하지 않음
+      # 해당 그룹 채팅방에서 삭제함
       return
+    
+    groupID = str(update.message.chat['id'])
+    userID = str(update.message.from_user['id'])
 
-    userInput = update.message.text
-    userID = update.message.chat['id']
-    userID_URL = '/' + str(userID)
+    groupDict = self.DB.get(userID, URL.GROUP + '/' + groupID)
 
-    groupDict = self.DB.get(userID, URL.USER + userID_URL + URL.GROUP)
-
-    try :
-      groupList = list(groupDict)
-      numberOfGroup = len(groupList)
-    except :
-      update.message.reply_text("등록된 그룹이 없습니다.")
+    if groupDict == None :
+      # 그룹 자체가 데이터베이스에 등록되지 않은 경우
+      update.message.reply_text("등록되지 않은 그룹입니다.")
       return
-
-    alarmState = list()
-    for i in range(numberOfGroup) :
-      if groupDict[groupList[i]]['alarm'] == B.ON :
-        alarmState.append("ON")
-      elif groupDict[groupList[i]]['alarm'] == B.OFF :
-        alarmState.append("OFF")
-
-    msg = "등록된 그룹 목록입니다."
-    if userInput == ('/' + CMD.GDELETE) :
-      for i in range(numberOfGroup) :
-        msg += '\n' + str(i) + '. ' + groupDict[groupList[i]]['gname'] + ' : ' + alarmState[i]
-      update.message.reply_text(msg)
-      update.message.reply_text("삭제할 그룹의 번호를 같이 입력해 주세요.\n" + \
-            "ex> /gdel 0 (0번 그룹을 삭제)")
-    else : # 번호 입력이 있었으면
-      groupNo = userInput[len(CMD.GDELETE) + 2 : ].strip()
-
-      try :
-        groupNo = int(groupNo)
-      except :
-        update.message.reply_text("잘못된 입력입니다.")
-        return
-
-      if groupNo < numberOfGroup :
-        groupID_URL = '/' + str(groupList[groupNo])
-        groupName = groupDict[groupList[groupNo]]['gname']
-
-        self.DB.delete(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL)
-        update.message.reply_text(groupName + " 그룹을 삭제했습니다.")
-        self.log.info(userID, "그룹 삭제 : " + str(groupList[groupNo]))
+    
+    # 그룹이 등록은 되어있는데
+    for key, val in groupDict['user'] :
+      if val == userID :
+        # 해당 그룹에 등록된 사용자 목록에 현재 사용자가 있으면
+        self.DB.delete(userID, URL.GROUP + '/' + groupID + URL.USER + '/' + key)
+        # 키 값으로 데이터 삭제
+        update.message.reply_text("현재 그룹을 등록 해제했습니다.")
+        self.log.info(userID, "그룹 삭제 : " + str(groupID))
       else :
-        update.message.reply_text("유효하지 않은 번호입니다.")
+        # 목록에 현재 사용자가 없으면
+        update.message.reply_text("등록되지 않은 그룹입니다.")

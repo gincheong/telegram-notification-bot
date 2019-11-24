@@ -39,6 +39,7 @@ class Keyword :
       return
 
     userID = update.message.chat['id']
+    userID_URL = '/' + str(userID)
     userInput = update.message.text
 
     if userInput == ("/" + CMD.KADD) :
@@ -46,15 +47,20 @@ class Keyword :
         "ex> /kadd 안녕 (\"안녕\" 키워드 추가)")
         # 사용법 보여줌
     else :
-      newKeyword = userInput[len(CMD.KADD) + 2 : ].strip().lower()
-      keywordDict = self.DB.get(userID, URL.USER + '/' + str(userID) + URL.KEYWORD)
-      
-      if keywordDict == None or newKeyword not in keywordDict.values() :
+      # 1124 new code
+      newKeyword = userInput[len(CMD.KADD) + 2 : ].strip().lower() # 소문자 변환하여 등록
+      KeywordDict = self.DB.get(userID, URL.USER + userID_URL + URL.KEYWORD)
+
+      if KeywordDict == None or newKeyword not in KeywordDict.values() :
+        # 1. 키워드가 하나도 등록되어 있지 않거나 (최초등록)
+        # 2. 키워드가 있지만, 중복 데이터가 아닌 경우에
         self.DB.push(userID, URL.USER + '/' + str(userID) + URL.KEYWORD, newKeyword)
+        # 키워드 등록
 
         self.log.info(userID, "키워드 추가 : " + newKeyword)
         update.message.reply_text(newKeyword + " 키워드를 추가했습니다.")
       else :
+        # 키워드가 중복되는 경우
         update.message.reply_text("이미 등록된 키워드입니다.")
 
   def keywordDelete(self, bot, update) :
@@ -69,21 +75,31 @@ class Keyword :
       update.message.reply_text("삭제할 키워드를 입력하세요.\n" + \
         "ex> /kdel 안녕 (\"안녕\" 키워드 삭제)")
     else :
-      deleteKeyword = userInput[len(CMD.KDELETE) + 2 : ].strip()
-      keywordDict = self.DB.get(userID, URL.USER + userID_URL + URL.KEYWORD)
-      
-      if keywordDict == None :
+      # 1124 new code
+      # fix : 삭제 시에도 대소문자 구분하지 않게 함(lower() 추가)
+      deleteKeyword = userInput[len(CMD.KDELETE) + 2 : ].strip().lower()
+      KeywordDict = self.DB.get(userID, URL.USER + userID_URL + URL.KEYWORD)
+
+      if KeywordDict == None :
+        # 등록된 키워드가 하나도 없는 경우
         update.message.reply_text("등록된 키워드가 없습니다.")
-      elif deleteKeyword not in keywordDict.values() :
+      elif deleteKeyword not in KeywordDict.values() :
+        # 등록되지 않은 키워드를 삭제하려 한 경우
         update.message.reply_text("등록되지 않은 키워드입니다.")
       else :
-        for key, value in keywordDict.items() :
+        # 키워드가 있는 경우, 해당 데이터 key값을 찾아 삭제함
+        for key, value in KeywordDict.items() :
+          # key값으로 삭제해야 하기 때문에 items() 사용한다.
           if deleteKeyword == value :
+            # 키워드가 발견되면
             self.DB.delete(userID, URL.USER + userID_URL + URL.KEYWORD + '/' + key)
-            break
+            # 해당 key값 이용하여 데이터 삭제 후
+            break # 반복문 탈출
         
+        # 키워드 삭제 후 메시지 전송
         update.message.reply_text(deleteKeyword + " 키워드를 삭제했습니다.")
         self.log.info(userID, "키워드 삭제 : " + deleteKeyword)
+
 
   def keywordList(self, bot, update) :
     if self.isPrivateMsg(update) == False :
@@ -100,76 +116,67 @@ class Keyword :
     except :
       update.message.reply_text("등록된 키워드가 없습니다.")
 
-  def keywordFind(self, bot, messageData, allUserData) :
-
-    for uid, udata in allUserData.items() :
-      try :
-        notificationState = udata['config']['notification']
-        # 그룹에 /start 하지 않으면 'config'가 정의되지 않는데
-        # 그 부분을 수정해야 함, 지금은 임시로 except로 뺀 상태
-        # 아니면 굳이 오류처리 안 해도 될ㄹ 것도 같고
-      except :
-        continue
-
-      if (uid == messageData['senderID']) or (notificationState == B.OFF) :
-        continue # 당사자이거나, 알람이 꺼진 사용자 스킵
-
-      try :
-        kList = list(udata['keyword'].values())
-        gDict = udata['group'].items()
-      except :
-        continue
-        # 키워드 등록을 안 한 사용자
-
-      for item in gDict :
-        gid, gdata = item
-        # 사용자 DB에 저장된 그룹 데이터
-
-        if (gid == messageData['groupID']) and gdata['alarm'] == B.ON :
-          # 2. 그룹에 속한 유저 검색
-          # 3. 그룹 알림을 켰는지 확인
-
-          for kvalue in kList :
-            if kvalue in messageData['text'].lower() :
-              # 4. 키워드 사용 확인
-
-              notiMessage = "%s 님이 호출했습니다.\n그룹 이름 : %s\n메세지 내용 : %s" % (messageData['senderName'], messageData['groupName'], messageData['text'])
-              
-              # Firebase 용량 건으로 추가 메시지 작성
-              warn_from_1118 = "사용 중인 데이터베이스의 요금제 용량 문제로 11월 중에 알람 기능이 작동하지 않을 수 있습니다.\n" + \
-                               "주말에 개선 작업을 할 예정입니다.\n" + \
-                               "이 메세지는 11월 18일부터 표시되며, 업데이트 후 제거됩니다.\n" +\
-                               "DM : @gincheong"
-
-              self.log.info(uid, "알림 전송 시도")
-              try :
-                bot.send_message(uid, warn_from_1118, disable_notification=True)
-                bot.send_message(uid, notiMessage, disable_web_page_preview=True)
-              except Exception as e :
-                self.log.error(uid, "알림 전송 실패")
-                self.log.error(uid, str(e))
-
-              self.log.info(uid, "알림 전송 : " + messageData['senderID'] + '/' + messageData['senderName'] + '/' + messageData['groupID'] + '/' + messageData['groupName'] + '/' + messageData['messageID'])
-
-              if messageData['groupName'] is not gdata['gname'] :
-                # 그룹 이름을 못 찾는다 -> 그룹명이 바뀌었는데 갱신 안됨
-                self.DB.update(uid, URL.USER + '/' + str(uid) + URL.GROUP + '/' + str(gid), { 'gname' : messageData['groupName'] }) # 갱신함
-
-              break # 동일 사용자의 키워드가 여러 번 사용돼도 한 번만 알림
-
   def checkMessage(self, bot, update) :
     if self.isPrivateMsg(update) == True :
       return
       # 개인 메세지로 온 것은 무시함
 
-    messageData = dict()
-    messageData['text'] = update.message.text
-    messageData['messageID'] = str(update.message.message_id)
-    messageData['senderID'] = str(update.message.from_user['id'])
-    messageData['groupID'] = str(update.message.chat['id']) # 어느 그룹인지 체크
-    messageData['groupName'] = update.message.chat['title']
-    messageData['senderName'] = self.getFullname(update)
+    # 1124 new code
+    # fix : notification 값으로 전역 알람 설정 꺼버림
+    message = update.message.text
+    messageID = str(update.message.message_id)
+    senderID = str(update.mesage.from_user['id'])
+    senderName = self.getFullname(update)
+    groupID = str(update.message.chat['id'])
+    groupName = update.message.chat['title']
 
-    allUserData = self.DB.get('CHECKMESSAGE', URL.USER)
+    groupUserDict = self.DB.get('CheckMessage', URL.GROUP + '/' + groupID + URL.USER)
+    # 해당 그룹에 속한 사용자 아이디를 가져온다
+    
+    # need test
+    if groupUserDict == None :
+      # 그룹에 등록된 사용자가 없는 경우 혹은
+      # 그룹 자체가 등록되어있지 않은 경우 (/start로 등록조차 하지 않음)
+      return # 함수 종료
 
-    self.keywordFind(bot, messageData, allUserData)
+    # 그룹이 있는 경우
+    for groupUserID in groupUserDict.values() :
+      # 그룹 안에 있는 사용자들을 대상으로..
+
+      each_userKeyword = self.DB.get('CheckMessage', URL.USER + '/' + str(groupUserID) + URL.KEYWORD)
+      # 해당 사용자의 키워드 데이터를 가져온다.
+
+      if each_userKeyword == None :
+        # 사용자가 등록한 키워드가 없는 경우
+        pass # 다음 사용자
+      else :
+        # 키워드가 있으면
+        for keyword in each_userKeyword.values() :
+          # 키워드를 하나씩 가져와서..
+
+          if keyword in message.lower() :
+            # 키워드가 메세지에서 발견되었다면
+            notiMessage = "%s 님이 호출했습니다.\n그룹 이름 : %s\n메세지 내용 : %s" % (senderName, groupName, message)
+            logMessage = "알림 전송 : %s / %s / %s / %s / %s" % (senderID, senderName, groupID, groupName, messageID)
+
+            self.log.info(groupUserID, "알림 전송 시도") # will be deprecated
+            
+            try :
+              bot.send_message(groupUserID, notiMessage, disable_web_page_preview=True)
+              # 링크 미리보기 비활성화
+              self.log.info(groupUserID, logMessage)
+            except Exception as e:
+              self.log.error(groupUserID, "알림 전송 실패")
+              self.log.error(groupUserID, str(e))
+            # 알림을 전송함
+
+            # 그룹이름이 바뀌었을 경우도 있으니, 그런 경우 데이터 갱신을 해 준다
+            savedGroupName = self.DB.get('CheckMessage', URL.GROUP + '/' + groupID + URL.INFO)['groupname']
+            # need test, URL.INFO에서 끊고 ['groupname'] 으로 참조해야 될 지, 아니면 이대로 될 지 확인
+            if groupName is not savedGroupName :
+              # 이름이 갱신된 경우!
+              self.DB.update(groupUserID, URL.GROUP + '/' + groupID + URL.INFO, { 'groupname' : groupName })
+              # 새 데이터로 update해줌
+
+            # 알림 전송 시 할 작업 끝
+            break # 한 사용자의 키워드가 두 개 이상 사용되어도, 한 번만 알람 발생하게 break함

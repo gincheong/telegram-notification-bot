@@ -7,22 +7,21 @@ class Command :
   KADD = "kadd"
   KLIST = "klist"
 
-  GDELETE = "gdel"
-  GTOGGLE = "gtoggle"
   GLIST = "glist"
 
   HELP = "help"
   INFO = "info"
   START = "start"
+  GDELETE = "delete"
   HOWTO = "howto"
-  DISABLE = "disable"
-  ENABLE = "enable"
 
 class FirebaseURL :
   KEYWORD = "/keyword"
-  CONFIG = "/config"
+  # CONFIG = "/config" # will be deprecated
+  INFO = "/info"
   GROUP = "/group"
   USER  = "/user"
+  # 'groupname'
 
 class Message :
   WELCOME = "원하는 그룹에 봇을 초대하고, 그룹 내 채팅으로 봇에게 /start 명령어를 입력하세요.\n" + \
@@ -41,10 +40,7 @@ class Message :
             "/klist : 설정한 키워드 목록을 확인합니다.\n" + \
             "\n" + \
             "/glist : 사용자에게 등록된 그룹 목록을 확인합니다.\n" + \
-            "/gtoggle 번호 : 그룹별로 키워드 알림을 ON/OFF 합니다.\n" + \
-            "/gdel 번호 : 이미 등록된 그룹을 삭제합니다.\n" + \
             "\n" + \
-            "/enable, /disable : 봇 전체 알림을 ON/OFF 합니다.\n" + \
             "/info : 봇 정보를 확인합니다.\n" + \
             "/howto : 봇 사용 방법을 확인합니다."
 

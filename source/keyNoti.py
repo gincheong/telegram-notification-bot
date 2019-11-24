@@ -35,7 +35,7 @@ class keyNotiBot :
     k = keywordMethod.Keyword(self.DB, self.log)
     g = groupMethod.Group(self.DB, self.log)
 
-    self.cmdHandler(CMD.GTOGGLE, g.groupToggle)
+    # self.cmdHandler(CMD.GTOGGLE, g.groupToggle) # deprecated
     self.cmdHandler(CMD.GLIST, g.groupList)
     self.cmdHandler(CMD.GDELETE, g.groupDelete)
 
@@ -49,8 +49,8 @@ class keyNotiBot :
     self.cmdHandler(CMD.HOWTO, self.showHowto)
 
     self.cmdHandler(CMD.START, self.start)
-    self.cmdHandler(CMD.DISABLE, self.disableNotification)
-    self.cmdHandler(CMD.ENABLE, self.enableNotification)
+    # self.cmdHandler(CMD.DISABLE, self.disableNotification) # deprecated
+    # self.cmdHandler(CMD.ENABLE, self.enableNotification) # deprecated
   
   def isPrivateMsg(self, update) :
     if update.message.chat['type'] == 'private' :
@@ -65,6 +65,7 @@ class keyNotiBot :
 
     self.updater.start_polling()
     self.updater.idle()
+    print("bot started") # 콘솔에서 실행확인 위한 출력
   
   # userFunc
   def start(self, bot, update) :
@@ -74,31 +75,38 @@ class keyNotiBot :
       update.message.reply_html(MSG.PREVIEW)
       return
 
-    groupID = update.message.chat['id']
+    groupID = str(update.message.chat['id'])
     groupName = update.message.chat['title']
-    userID = update.message.from_user['id']
-    userID_URL = '/' + str(userID)
-    groupID_URL = '/' + str(groupID)
-    
-    groupList = self.DB.get(userID, URL.USER + userID_URL + URL.GROUP)
-    
-    if groupList == None or str(groupID) not in groupList.keys()  : # 신규등록
-      self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'alarm' : B.ON })
-      self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'gname' : groupName })
+    userID = str(update.message.from_user['id'])
 
-      self.log.info(userID, "그룹 추가 : " + str(groupID))
-      update.message.reply_text("현재 그룹을 키워드 알림 봇에 등록합니다.\n기타 명령은 봇과의 개인 대화에서만 작동합니다.")
+    # 1124 new code
+    savedGroup = self.DB.get(userID, URL.GROUP + '/' + groupID)
+    
+    if savedGroup == None :
+      # 등록되지 않은 그룹인 경우
+      self.DB.update(userID, URL.GROUP + '/' + groupID + URL.INFO, { 'groupname' : groupName })
+      # info 아래에 그룹 이름 추가
+      self.DB.push(userID, URL.GROUP + '/' + groupID + URL.USER, userID)
+      # 사용자 목록에 추가
     else :
-      self.DB.update(userID, URL.USER + userID_URL + URL.GROUP + groupID_URL, { 'gname' : groupName })
-      # 그룹 이름이 바뀌면 갱신, 근데 유저가 start를 입력 해야지만 갱신된다..
-      
-      self.log.warn(userID, "등록된 그룹 추가 시도 : " + str(groupID))
-      update.message.reply_text("이미 등록된 그룹입니다.\n기타 명령은 봇과의 개인 대화에서만 작동합니다.")
+      # 이미 등록된 그룹인 경우
+      savedGroupName = savedGroup['info']['groupname']
+      if groupName is not savedGroupName :
+        self.DB.update(userID, URL.GROUP + '/' + groupID + URL.INFO, { 'groupname' : groupName })
+      # 그룹이름이 달라졌을 경우 갱신함
 
-    notiState = self.DB.get(userID, URL.USER + userID_URL + URL.CONFIG)
-
-    if notiState == None :
-      self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : B.ON })    
+      # 사용자가 그룹에 등록되어 있는지 확인..
+      savedGroupUser = self.DB.get(userID, URL.GROUP + '/' + groupID + URL.USER)
+      if userID not in savedGroupUser.values() :
+        # /start 입력한 사용자 ID가 그룹 내 사용자 목록에 없으면
+        self.DB.push(userID, URL.GROUP + '/' + groupID + URL.USER, userID)
+        # 새로 추가함
+        self.log.info(userID, "그룹 추가 : " + groupID)
+        update.message.reply_text("현재 그룹을 키워드 알림 봇에 등록합니다.\n기타 명령은 봇과의 개인 대화에서만 작동합니다.")
+      else :
+        # 이미 등록되어 있으면
+        self.log.warn(userID, "이미 등록된 그룹 추가 시도 : " + groupID)
+        update.message.reply_text("이미 등록된 그룹입니다.\n기타 명령은 봇과의 개인 대화에서만 작동합니다.")
 
   def showHelp(self, bot, update) :
     if self.isPrivateMsg(update) == False :
@@ -116,25 +124,3 @@ class keyNotiBot :
     if self.isPrivateMsg(update) == False :
       return
     update.message.reply_html(MSG.HOWTO)
-
-  def enableNotification(self, bot, update) :
-    if self.isPrivateMsg(update) == False :
-      return
-      
-    userID = update.message.chat['id']
-    userID_URL = '/' + str(userID)
-
-    self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : B.ON })
-    update.message.reply_text("전체 키워드 알림을 ON합니다.")
-    self.log.info(userID, "전체 알림 ON 설정")
-
-  def disableNotification(self, bot, update) :
-    if self.isPrivateMsg(update) == False :
-      return
-    
-    userID = update.message.chat['id']
-    userID_URL = '/' + str(userID)
-    
-    self.DB.update(userID, URL.USER + userID_URL + URL.CONFIG, { 'notification' : B.OFF })
-    update.message.reply_text("전체 키워드 알림을 OFF합니다.")
-    self.log.info(userID, "전체 알림 OFF 설정")
