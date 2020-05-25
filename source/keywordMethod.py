@@ -120,9 +120,7 @@ class Keyword :
     if self.isPrivateMsg(update) == True :
       return
       # 개인 메세지로 온 것은 무시함
-
-    # 1124 new code
-    # fix : notification 값으로 전역 알람 설정 꺼버림
+`
     message = update.message.text
     messageID = str(update.message.message_id)
     senderID = str(update.message.from_user['id'])
@@ -161,7 +159,7 @@ class Keyword :
           if keyword in message.lower() :
             # 키워드가 메세지에서 발견되었다면
             notiMessage = "%s 님이 호출했습니다.\n그룹 이름 : %s\n메세지 내용 : %s" % (senderName, groupName, message)
-            logMessage = "알림 전송 : %s / %s / %s / %s / %s" % (senderID, senderName, groupID, groupName, messageID)
+            logMessage = "알림 전송 : uid %s / gid %s / mid %s" % (senderID, groupID, messageID)
 
             self.log.info(groupUserID, "알림 전송 시도") # will be deprecated
             
@@ -176,7 +174,6 @@ class Keyword :
 
             # 그룹이름이 바뀌었을 경우도 있으니, 그런 경우 데이터 갱신을 해 준다
             savedGroupName = self.DB.get('CheckMessage', URL.GROUP + '/' + groupID + URL.INFO)['groupname']
-            # need test, URL.INFO에서 끊고 ['groupname'] 으로 참조해야 될 지, 아니면 이대로 될 지 확인
             if groupName is not savedGroupName :
               # 이름이 갱신된 경우!
               self.DB.update(groupUserID, URL.GROUP + '/' + groupID + URL.INFO, { 'groupname' : groupName })
