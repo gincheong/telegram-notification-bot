@@ -23,11 +23,12 @@ class keyNotiBot :
     self.DB = DatabaseControl.DatabaseControl(key, url, self.log)
 
     self.core = telegram.Bot(self.token)
-    self.updater = Updater(self.token)
+    self.updater = Updater(self.token, use_context=True) # ptb12버전으로 바뀌면서 use_context=True로 맞추고 다른 코드도 바꾸기
       
   def msgHandler(self, func) :
     self.updater.dispatcher.add_handler(MessageHandler(Filters.text, func))
-  
+    # self.updater.dispatcher.add_handler(MessageHandler(Filters.status_update.left_chat_member, func))
+
   def cmdHandler(self, cmd, func) :                               
     self.updater.dispatcher.add_handler(CommandHandler(cmd, func))
   
