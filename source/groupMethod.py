@@ -21,34 +21,32 @@ class Group :
     else :
       return False
 
+  # 200525
   def groupList(self, bot, update) :
     if self.isPrivateMsg(update) == False :
-      # 개인 메세지가 아니면 실행 안함
+      # 개인 메세지일때만 실행
       return
 
-    userID = update.message.chat['id']
-
-    # 1124 new code
     userID = str(update.message.chat['id'])
-    groupDict = self.DB.get(userID, URL.GROUP)
-    groupList = list(groupDict)
-    # 등록된 전체 그룹 목록을 가져오기
-    # 용량낭비지만 어쩔수없음 이부분은
+    userID_URL = '/' + userID
+    groupData = self.DB.get(userID, URL.USER + userID_URL + URL.REGISTERED_GROUP)
+    
+    fullMessage = "등록된 그룹 목록입니다."
+    # messageFormat = "{}. [{}] {}"
+    messageFormat = "{}. {}"
 
-    userGroupList = list()
-    for groupID in groupList :
-      # 등록된 각 그룹 아이디에 대해서
-      groupUserDict = self.DB.get(userID, URL.GROUP + '/' + groupID + '/' + URL.USER)
-      if userID in groupUserDict.values() :
-        # 그룹의 사용자 목록에 포함되어 있으면
-        userGroupName = self.DB.get(userID, URL.GROUP + '/' + groupID + '/' + URL.INFO)['groupname']
-        userGroupList.append(userGroupName)
-        # 해당 그룹의 이름을 리스트에 추가
+    for idx, groupData in enumerate(groupData.items()) :
+      groupID, alarm = groupData
+      groupID_URL = '/' + str(groupID)
+      groupName = self.DB.get(userID, URL.GROUP + groupID_URL + URL.INFO)['groupname']
 
-    message = "등록된 그룹 목록입니다."
-    for name in userGroupList :
-      message += '\n' + name
-    update.message.reply_text(message)
+      alarm = str(alarm).replace('True', 'ON').replace('False', 'OFF')
+      
+      # 알람설정하는거 없어서 우선 ON OFF 표시 안하기
+      # fullMessage += '\n' + messageFormat.format(idx+1, alarm, groupName)
+      fullMessage += '\n' + messageFormat.format(idx+1, groupName)
+
+    update.message.reply_text(fullMessage)
 
   def groupDelete(self, bot, update) :
     if self.isPrivateMsg(update) == True :
