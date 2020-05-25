@@ -23,7 +23,9 @@ class keyNotiBot :
     self.DB = DatabaseControl.DatabaseControl(key, url, self.log)
 
     self.core = telegram.Bot(self.token)
-    self.updater = Updater(self.token)
+    self.updater = Updater(self.token, use_context=True)
+    # https://github.com/python-telegram-bot/python-telegram-bot/wiki/Transition-guide-to-Version-12.0#what-exactly-is-callbackcontext
+    # 12버전으로 코드 바꾸기
       
   def msgHandler(self, func) :
     self.updater.dispatcher.add_handler(MessageHandler(Filters.text, func))
