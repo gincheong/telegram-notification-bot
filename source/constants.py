@@ -48,8 +48,9 @@ class Message :
           "3. <b>봇과의 개인 대화로</b> 키워드를 등록합니다."
 
   INFO = "키워드 감지를 위해 봇이 메시지 접근 권한을 가지고 있습니다. (Group Privacy Disabled)\n" + \
-         "작동 확인을 위하여 텔레그램 내부의 그룹ID, 사용자ID, 메세지ID 만을 기록합니다.\n" + \
+         "작동 확인을 위하여 텔레그램 내부의 그룹ID, 사용자ID, 메세지ID 를 기록합니다.\n" + \
          "가입 시 입력한 사용자 ID와는 다른 것이며, 해당 ID들로는 사용자 이름, 메세지 내용 등을 알 수 없습니다.\n" + \
+         "등록된 그룹을 사용자가 확인할 수 있도록, 그룹명만을 예외적으로 저장하고 있습니다.\n" + \
          "데이터는 암호화하지 않고 저장하므로 중요한 개인정보를 입력하지 마세요.\n" + \
          'Github : <a href="https://github.com/gincheong/telegram-notification-bot">telegram-notification-bot</a>\n' + \
          "Telegram : @gincheong\n" + \
