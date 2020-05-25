@@ -17,9 +17,10 @@ class DatabaseControl :
     except Exception as e :
       self.log.error(userId, "[Firebase] Set 오류, " + value + " // " + str(e))
 
-  def get(self, userId, url) :
+  def get(self, userId, url, shallow=False) :
+    # shallow True 설정 시 child 데이터를 가져오지 않음
     try :
-      return db.reference(url).get()
+      return db.reference(url).get(shallow=shallow)
     except Exception as e :
       self.log.error(userId, "[Firebase] Get 오류 // " + str(e))
       return None
