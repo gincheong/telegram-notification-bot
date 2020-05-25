@@ -27,6 +27,7 @@ class keyNotiBot :
       
   def msgHandler(self, func) :
     self.updater.dispatcher.add_handler(MessageHandler(Filters.text, func))
+    # self.updater.dispatcher.add_handler(MessageHandler(Filters.status_update.left_chat_member, func))
   
   def cmdHandler(self, cmd, func) :                               
     self.updater.dispatcher.add_handler(CommandHandler(cmd, func))
@@ -37,7 +38,7 @@ class keyNotiBot :
 
     # self.cmdHandler(CMD.GTOGGLE, g.groupToggle) # deprecated
     self.cmdHandler(CMD.GLIST, g.groupList)
-    self.cmdHandler(CMD.GDELETE, g.groupDelete)
+    # self.cmdHandler(CMD.GDELETE, g.groupDelete)
 
     self.cmdHandler(CMD.KADD, k.keywordAdd)
     self.cmdHandler(CMD.KLIST, k.keywordList)
