@@ -45,7 +45,7 @@ class keyNotiBot :
     self.msgHandler(k.checkMessage)
 
     self.cmdHandler(CMD.HELP, self.showHelp)
-    self.cmdHandler(CMD.INFO, self.showInfo)
+    # self.cmdHandler(CMD.INFO, self.showInfo)
     self.cmdHandler(CMD.HOWTO, self.showHowto)
 
     self.cmdHandler(CMD.START, self.start)
@@ -69,10 +69,11 @@ class keyNotiBot :
   
   # userFunc
   def start(self, bot, update) :
-    if self.isPrivateMsg(update) == True : # 개인톡으로 start를 보내면 경고함
+    if self.isPrivateMsg(update) == True :
       # 봇 최초 실행 시에 이리로 오는 것이기도 함
       update.message.reply_text(MSG.WELCOME)
       update.message.reply_html(MSG.PREVIEW)
+      update.message.reply_html(MSG.INFO, disable_web_page_preview=True)
       return
 
     groupID = str(update.message.chat['id'])
@@ -123,11 +124,11 @@ class keyNotiBot :
       return
     update.message.reply_text(MSG.CMDLIST)
 
-  def showInfo(self, bot, update) :
-    if self.isPrivateMsg(update) == False :
-      return
-    # update.message.reply_text("개발중인 봇입니다.")
-    update.message.reply_html(MSG.INFO, disable_web_page_preview=True)
+  # DEPRECATED / INFO 내용을 start 메세지에 추가함
+  # def showInfo(self, bot, update) :
+  #   if self.isPrivateMsg(update) == False :
+  #     return
+  #   update.message.reply_html(MSG.INFO, disable_web_page_preview=True)
 
   def showHowto(self, bot, update) :
     if self.isPrivateMsg(update) == False :
