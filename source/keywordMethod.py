@@ -120,7 +120,7 @@ class Keyword :
     if self.isPrivateMsg(update) == True :
       return
       # 개인 메세지로 온 것은 무시함
-`
+
     message = update.message.text
     messageID = str(update.message.message_id)
     senderID = str(update.message.from_user['id'])
