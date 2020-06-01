@@ -1,14 +1,17 @@
 from InitBot import TelegramBot
+from FirebaseConnect import FirebaseConnect
 
 from configparser import ConfigParser # read ini files
 
+import logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
 if __name__ == "__main__":
 
-    config = ConfigParser()
-    config.read('config.ini')
-    
-    TOKEN = config['BOT']['TOKEN']
-    FIREBASE_URL = config['FIREBASE']['URL']
-    FIREBASE_CERTPATH = config['FIREBASE']['CERTPATH']
+    CONFIG_PATH = 'config.ini'
 
-    bot = TelegramBot(TOKEN, debug=True)
+    config = ConfigParser()
+    config.read(CONFIG_PATH)
+    TOKEN = config['BOT']['TOKEN']
+
+    bot = TelegramBot(TOKEN, CONFIG_PATH, debug=True)

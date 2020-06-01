@@ -9,7 +9,9 @@ import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 class TelegramBot :
-    def __init__(self, token, debug=False) :
+    def __init__(self, token, configPath, debug=False) :
+        self.configPath = configPath
+
         self.updater = Updater(token, use_context=True)
         self.dispatcher = self.updater.dispatcher
 
@@ -28,12 +30,14 @@ class TelegramBot :
 
     def addMessageHandler(self, callback) :
         dispatcher = self.dispatcher
-        handler = MessageHandler(Filters.text & (~Filters.command), callback) # command를 제외한 text에만 handler 적용
+        handler = MessageHandler(Filters.text & (~Filters.command), callback)
+        # command를 제외한 text에만 handler 적용
         dispatcher.add_handler(handler)
 
     # def addErrorHandler(self, command, callback) :
 
     def initHandler(self, debug) :
+        configPath = self.configPath
 
         # keyword Function 불러오기
 
@@ -42,7 +46,7 @@ class TelegramBot :
 
 
         # Base Functions
-        baseFunction = BaseFunction()
+        baseFunction = BaseFunction(configPath)
         self.addCommandHandler('start', baseFunction.start)
         self.addCommandHandler('help', baseFunction.help_)
         self.addCommandHandler('howto', baseFunction.howto)
