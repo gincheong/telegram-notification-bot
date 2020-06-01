@@ -1,9 +1,17 @@
+from FirebaseConnect import FirebaseConnect
+
+from configparser import ConfigParser
+
 import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 class BaseFunction :
-    def __init__(self) :
-        pass
+    def __init__(self, configPath) :
+        self.database = FirebaseConnect(configPath)
+        config = ConfigParser()
+        config.read(configPath)
+        
+        self.URL = config['URL']
 
     def start(self, update, context) :
         if update.effective_chat.type == "private" :
@@ -14,11 +22,52 @@ class BaseFunction :
             )
             context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
 
+            '''
+            1. 신규 사용자를 등록하는 경우
+            '''
+
         elif update.effective_chat.type == "group" :
+            database = self.database
+            URL = self.URL
+
             senderId = update.message.from_user.id
             messageId = update.message.message_id
-            
+
+            groupId = str(update.effective_chat.id)
+            groupName = str(update.effective_chat.title)
+
             # Firebase 연결
+            storedGroups = database.get(URL['GROUP'] + '/' + groupId)
+            registerdGroups = database.get(URL['USER'] + '/' + senderId + URL['REGISTERED_GROUP'])
+
+            '''
+            1. 사용자 등록
+                1-1. 신규 사용자 등록인 경우
+                1-2. 이미 등록되어 있던 사용자인 경우
+
+                1-3. 사용자에 등록된 그룹인 경우
+                1-4. 사용자에 등록 안 된 그룹인 경우
+
+            2. 그룹 등록
+                2-1. 신규 그룹 등록인 경우
+                2-2. 이미 등록된 그룹인 경우
+
+                2-3. 그룹에 등록된 사용자인 경우
+                2-4. 그룹에 사용자 등록 안 된 경우
+            '''
+
+            # GROUP 에 그룹데이터가 없는 경우
+            if storedGroups == None :
+                database.update(URL['GROUP'] + '/' + groupId + URL['INFO'],
+                    { 'groupname' : groupName }
+                ) # 새 그룹을 이름과 함께 저장함
+                database.push(URL['GROUP'] + '/' + groupId + URL['USER'], senderId)
+                # 그룹에 포함된 사용자 명단을 추가
+            # 이미 그룹 자체는 등록된 경우
+            else :
+                
+
+
             if "그룹이 이미 등록된 경우" :
                 message = (
                     "이미 등록된 그룹입니다." "\n"
