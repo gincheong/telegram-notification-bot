@@ -2,3 +2,4 @@ source/main_test.py
 source/log/
 Firebase
 *.pyc
+*.ini
