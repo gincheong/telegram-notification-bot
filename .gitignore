@@ -3,3 +3,4 @@ source/log/
 Firebase
 *.pyc
 *.ini
+*.md
