@@ -6,4 +6,5 @@ class DebugFunction :
         pass
 
     def getMessageData(self, update, context) :
+        print(update.effective_chat)
         print(update.message)
