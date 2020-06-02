@@ -9,11 +9,17 @@ class BaseFunction :
     def __init__(self, configPath) :
         self.database = FirebaseConnect(configPath)
         config = ConfigParser()
-        config.read(configPath)
+        config.read(configPath, encoding="utf-8")
         
         self.URL = config['URL']
+        self.KEY = config['KEY']
 
     def start(self, update, context) :
+        database = self.database
+        URL = self.URL
+        KEY = self.KEY
+
+        # Private Chat
         if update.effective_chat.type == "private" :
             senderId = update.effective_chat.id
             message = (
@@ -22,65 +28,48 @@ class BaseFunction :
             )
             context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
 
-            '''
-            1. 신규 사용자를 등록하는 경우
-            '''
-
+        # Group Chat
         elif update.effective_chat.type == "group" :
-            database = self.database
-            URL = self.URL
-
             senderId = update.message.from_user.id
             messageId = update.message.message_id
 
-            groupId = str(update.effective_chat.id)
-            groupName = str(update.effective_chat.title)
+            groupId = update.effective_chat.id
+            groupName = update.effective_chat.title
 
             # Firebase 연결
-            storedGroups = database.get(URL['GROUP'] + '/' + groupId)
-            registerdGroups = database.get(URL['USER'] + '/' + senderId + URL['REGISTERED_GROUP'])
 
-            '''
-            1. 사용자 등록
-                1-1. 신규 사용자 등록인 경우
-                1-2. 이미 등록되어 있던 사용자인 경우
-
-                1-3. 사용자에 등록된 그룹인 경우
-                1-4. 사용자에 등록 안 된 그룹인 경우
-
-            2. 그룹 등록
-                2-1. 신규 그룹 등록인 경우
-                2-2. 이미 등록된 그룹인 경우
-
-                2-3. 그룹에 등록된 사용자인 경우
-                2-4. 그룹에 사용자 등록 안 된 경우
-            '''
-
-            # GROUP 에 그룹데이터가 없는 경우
-            if storedGroups == None :
-                database.update(URL['GROUP'] + '/' + groupId + URL['INFO'],
-                    { 'groupname' : groupName }
-                ) # 새 그룹을 이름과 함께 저장함
-                database.push(URL['GROUP'] + '/' + groupId + URL['USER'], senderId)
-                # 그룹에 포함된 사용자 명단을 추가
-            # 이미 그룹 자체는 등록된 경우
+            ''' GROUP 쪽 데이터 작업 '''
+            # 그룹 신규 등록 or 그룹 이름 최신화
+            database.update(URL['GROUP'] + '/' + str(groupId) + URL['INFO'],
+                { KEY['GROUPNAME'] : groupName }
+            )
+            # Todo#3
+            storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER']) # GROUP쪽에 등록된 사용자 목록
+            if str(senderId) not in storedGroupUsers.values() :
+                # 신규 등록
+                database.push(URL['GROUP'] + '/' + str(groupId) + URL['USER'], str(senderId))
             else :
-                
+                pass
 
-
-            if "그룹이 이미 등록된 경우" :
-                message = (
-                    "이미 등록된 그룹입니다." "\n"
-                    "기타 명령어는 봇과의 개인 대화에서만 작동합니다."
+            ''' USER 쪽 데이터 '''
+            registeredGroups = database.get(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP']) # USER쪽에 등록된 그룹 목록
+            if str(groupId) not in registeredGroups.keys() :
+                # 신규 등록
+                database.update(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP'],
+                    { str(groupId) : True }
                 )
-            elif "그룹을 새로 등록하는 경우" :
                 message = (
                     "현재 그룹을 키워드 알림 봇에 등록합니다." "\n"
                     "기타 명령어는 봇과의 개인 대화에서만 작동합니다."
                 )
-            
-            context.bot.send_message(chat_id=senderId, text=message, reply_to_message_id=messageId)
+            else :
+                message = (
+                    "이미 등록된 그룹입니다." "\n"
+                    "기타 명령어는 봇과의 개인 대화에서만 작동합니다."
+                )
 
+            context.bot.send_message(chat_id=groupId, text=message, reply_to_message_id=messageId)
+            
 
     def help_(self, update, context) :
         if update.effective_chat.type == "private" :
