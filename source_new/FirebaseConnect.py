@@ -7,9 +7,7 @@ import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 class FirebaseConnect :
-    def __init__(self, configPath) :
-        config = ConfigParser()
-        config.read(configPath, encoding="utf-8")
+    def __init__(self, config) :
         
         FIREBASE_URL = config['FIREBASE']['URL']
         FIREBASE_CERTPATH = config['FIREBASE']['CERTPATH']

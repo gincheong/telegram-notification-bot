@@ -3,14 +3,21 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext import CallbackContext
 
+from configparser import ConfigParser
+
 from BaseFunction import BaseFunction
+from KeywordFunction import KeywordFunction
+from FirebaseConnect import FirebaseConnect
+
 
 import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 class TelegramBot :
     def __init__(self, token, configPath, debug=False) :
-        self.configPath = configPath
+        config = ConfigParser()
+        config.read(configPath, encoding="utf-8")
+        self.config = config
 
         self.updater = Updater(token, use_context=True)
         self.dispatcher = self.updater.dispatcher
@@ -37,19 +44,24 @@ class TelegramBot :
     # def addErrorHandler(self, command, callback) :
 
     def initHandler(self, debug) :
-        configPath = self.configPath
+        config = self.config
+        CMD = config['CMD']
+        database = FirebaseConnect(config)
 
         # keyword Function 불러오기
-
+        keywordFunction = KeywordFunction(config, database)
+        self.addCommandHandler(CMD['KADD'], keywordFunction.kadd)
+        self.addCommandHandler(CMD['KLIST'], keywordFunction.klist)
+        self.addCommandHandler(CMD['KDEL'], keywordFunction.kdel)
 
         # Group Function 불러오기
 
 
         # Base Functions
-        baseFunction = BaseFunction(configPath)
-        self.addCommandHandler('start', baseFunction.start)
-        self.addCommandHandler('help', baseFunction.help_)
-        self.addCommandHandler('howto', baseFunction.howto)
+        baseFunction = BaseFunction(config, database)
+        self.addCommandHandler(CMD['START'], baseFunction.start)
+        self.addCommandHandler(CMD['HELP'], baseFunction.help_)
+        self.addCommandHandler(CMD['HOWTO'], baseFunction.howto)
 
         # Debug Functions, debug=True 시에만 실행
         if debug :

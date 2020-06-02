@@ -1,18 +1,15 @@
-from FirebaseConnect import FirebaseConnect
-
 from configparser import ConfigParser
 
 import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 class BaseFunction :
-    def __init__(self, configPath) :
-        self.database = FirebaseConnect(configPath)
-        config = ConfigParser()
-        config.read(configPath, encoding="utf-8")
+    def __init__(self, config, database) :
+        self.database = database
         
         self.URL = config['URL']
         self.KEY = config['KEY']
+        self.CMD = config['CMD']
 
     def start(self, update, context) :
         database = self.database
@@ -74,10 +71,12 @@ class BaseFunction :
     def help_(self, update, context) :
         if update.effective_chat.type == "private" :
             # only available in private chat
+            CMD = self.CMD
             senderId = update.effective_chat.id
             message = (
-                "/kadd <i>[keyword]</i> : 알람을 받을 키워드를 추가합니다." "\n"
-                "/kdel <i>[keyword]</i> : 등록된 키워드를 삭제합니다."
+                "/" + CMD['KADD'] + " <i>[keyword]</i> : 알람을 받을 키워드를 추가합니다." "\n"
+                "/" + CMD['KDEL'] + " <i>[keyword]</i> : 등록된 키워드를 삭제합니다." "\n"
+                "/" + CMD['KLIST'] + " : 등록된 키워드를 표시합니다."
             )
             context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
 
