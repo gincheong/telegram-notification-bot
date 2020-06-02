@@ -7,6 +7,7 @@ from configparser import ConfigParser
 
 from BaseFunction import BaseFunction
 from KeywordFunction import KeywordFunction
+from GroupFunction import GroupFunction
 from FirebaseConnect import FirebaseConnect
 
 
@@ -55,7 +56,8 @@ class TelegramBot :
         self.addCommandHandler(CMD['KDEL'], keywordFunction.kdel)
 
         # Group Function 불러오기
-
+        groupFunction = GroupFunction(config, database)
+        self.addCommandHandler(CMD['GLIST'], groupFunction.glist)
 
         # Base Functions
         baseFunction = BaseFunction(config, database)
