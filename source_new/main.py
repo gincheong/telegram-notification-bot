@@ -11,7 +11,7 @@ if __name__ == "__main__":
     CONFIG_PATH = 'config.ini'
 
     config = ConfigParser()
-    config.read(CONFIG_PATH)
+    config.read(CONFIG_PATH, encoding="utf-8")
     TOKEN = config['BOT']['TOKEN']
 
     bot = TelegramBot(TOKEN, CONFIG_PATH, debug=True)
