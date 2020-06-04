@@ -98,7 +98,7 @@ class BaseFunction :
             # Todo#3
             storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER'])
             if storedGroupUsers == None :
-                storedGroupUsers = {} # None 반환되어 에러나는것 방지
+                storedGroupUsers = {} # None 반환되어 아래 조건문 에러나는것 방지
 
             if str(senderId) not in storedGroupUsers.values() :
                 pass
@@ -198,3 +198,51 @@ class BaseFunction :
                 "다른 명령어는 /help 명령어로 확인할 수 있습니다."
             )
             context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
+
+    def leftChatMember(self, update, context) : # 어차피 그룹 채팅에서만 작동?
+        # 사용자가 그룹에서 나가면, 그 사용자의 그룹 등록 정보를 삭제함
+        database = self.database
+
+        URL = self.URL
+
+        leftMemberId = update.message.left_chat_member.id
+        groupId = update.effective_chat.id
+
+        ''' GROUP쪽 데이터 삭제 '''
+        # Todo#3
+        storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER'])
+        if storedGroupUsers == None :
+            storedGroupUsers = {}
+        
+        if str(leftMemberId) not in storedGroupUsers.values() :
+            pass
+        else :
+            for key, val in storedGroupUsers.items() :
+                if val == str(leftMemberId) :
+                    database.delete(URL['GROUP'] + '/' + str(leftMemberId) + URL['USER'] + '/' + key)
+                    break
+        
+        ''' USER쪽 데이터 삭제 '''
+        storedRegisteredGroups = database.get(URL['USER'] + '/' + str(leftMemberId) + URL['REGISTERED_GROUP'])
+        if storedRegisteredGroups == None :
+            storedRegisteredGroups = {}
+        
+        if str(groupId) not in storedRegisteredGroups.keys() :
+            pass
+        else :
+            database.delete(URL['USER'] + '/' + str(leftMemberId) + URL['REGISTERED_GROUP'] + '/' + str(groupId))
+
+    def newChatTitle(self, update, context) : # 어차피 그룹 채팅에서만 작동
+        database = self.database
+        
+        URL = self.URL
+        KEY = self.KEY
+
+        groupId = update.effective_chat.id
+        newGroupName = update.message.new_chat_title
+
+        database.get(URL['GROUP'] + '/' + str(groupId) + URL['INFO'],
+            { KEY['GROUPNAME'] : newGroupName }
+        )
+        # 이름 갱신
+

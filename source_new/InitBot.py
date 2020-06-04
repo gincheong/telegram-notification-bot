@@ -42,6 +42,16 @@ class TelegramBot :
         # command를 제외한 text에만 handler 적용
         dispatcher.add_handler(handler)
 
+    def addLeftChatMemberHandler(self, callback) :
+        dispatcher = self.dispatcher
+        handler = MessageHandler(Filters.status_update.left_chat_member, callback)
+        dispatcher.add_handler(handler)
+
+    def addNewChatTitleHandler(self, callback) :
+        dispatcher = self.dispatcher
+        handler = MessageHandler(Filters.status_update.new_chat_title, callback)
+        dispatcher.add_handler(handler)
+
     # def addErrorHandler(self, command, callback) :
 
     def initHandler(self, debug) :
@@ -66,6 +76,8 @@ class TelegramBot :
         self.addCommandHandler(CMD['HOWTO'], baseFunction.howto)
         self.addCommandHandler(CMD['DELETE'], baseFunction.delete)
         self.addCommandHandler(CMD['STOP'], baseFunction.stop)
+        self.addLeftChatMemberHandler(baseFunction.leftChatMember)
+        self.addNewChatTitleHandler(baseFunction.newChatTitle)
 
         # Debug Functions, debug=True 시에만 실행
         if debug :
