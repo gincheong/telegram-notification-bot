@@ -64,6 +64,8 @@ class TelegramBot :
         self.addCommandHandler(CMD['START'], baseFunction.start)
         self.addCommandHandler(CMD['HELP'], baseFunction.help_)
         self.addCommandHandler(CMD['HOWTO'], baseFunction.howto)
+        self.addCommandHandler(CMD['DELETE'], baseFunction.delete)
+        self.addCommandHandler(CMD['STOP'], baseFunction.stop)
 
         # Debug Functions, debug=True 시에만 실행
         if debug :

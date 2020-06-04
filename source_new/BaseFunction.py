@@ -12,10 +12,6 @@ class BaseFunction :
         self.CMD = config['CMD']
 
     def start(self, update, context) :
-        database = self.database
-        URL = self.URL
-        KEY = self.KEY
-
         # Private Chat
         if update.effective_chat.type == "private" :
             senderId = update.effective_chat.id
@@ -23,10 +19,15 @@ class BaseFunction :
                 "내가 등록한 키워드가 그룹 채팅방에서 사용되면, 봇이 메시지를 전송합니다." "\n"
                 "/howto 명령어로 사용방법을 확인하세요."
             )
-            context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
+            context.bot.send_message(chat_id=senderId, text=message)
 
         # Group Chat
         elif update.effective_chat.type == "group" :
+            database = self.database
+            
+            URL = self.URL
+            KEY = self.KEY
+
             senderId = update.message.from_user.id
             messageId = update.message.message_id
 
@@ -42,6 +43,9 @@ class BaseFunction :
             )
             # Todo#3
             storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER']) # GROUP쪽에 등록된 사용자 목록
+            if storedGroupUsers == None :
+                storedGroupUsers = {}
+
             if str(senderId) not in storedGroupUsers.values() :
                 # 신규 등록
                 database.push(URL['GROUP'] + '/' + str(groupId) + URL['USER'], str(senderId))
@@ -49,8 +53,11 @@ class BaseFunction :
                 pass
 
             ''' USER 쪽 데이터 '''
-            registeredGroups = database.get(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP']) # USER쪽에 등록된 그룹 목록
-            if str(groupId) not in registeredGroups.keys() :
+            storedRegisteredGroups = database.get(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP']) # USER쪽에 등록된 그룹 목록
+            if storedRegisteredGroups == None :
+                storedRegisteredGroups = {}
+
+            if str(groupId) not in storedRegisteredGroups.keys() :
                 # 신규 등록
                 database.update(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP'],
                     { str(groupId) : True }
@@ -67,6 +74,106 @@ class BaseFunction :
 
             context.bot.send_message(chat_id=groupId, text=message, reply_to_message_id=messageId)
             
+
+    def delete(self, update, context) :
+        if update.effective_chat.type == "private" :
+            senderId = update.effective_chat.id
+            message = (
+                "등록 해제를 원하는 그룹 채팅방에서 명령어를 입력해주세요."
+            )
+            context.bot.send_message(chat_id=senderId, text=message)
+
+        elif update.effective_chat.type == "group" :
+            database = self.database
+        
+            CMD = self.CMD
+            URL = self.URL
+
+            senderId = update.message.from_user.id
+            messageId = update.message.message_id
+
+            groupId = update.effective_chat.id
+
+            ''' GROUP쪽 데이터 삭제 '''
+            # Todo#3
+            storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER'])
+            if storedGroupUsers == None :
+                storedGroupUsers = {} # None 반환되어 에러나는것 방지
+
+            if str(senderId) not in storedGroupUsers.values() :
+                pass
+            else : 
+                for key, val in storedGroupUsers.items() :
+                    if val == str(senderId) :
+                        database.delete(URL['GROUP'] + '/' + str(groupId) + URL['USER'] + '/' + key)
+                        break
+
+            ''' USER쪽 데이터 삭제 '''
+            storedRegisteredGroups = database.get(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP'])
+            if storedRegisteredGroups == None :
+                storedRegisteredGroups = {}
+            
+            if str(groupId) not in storedRegisteredGroups.keys() :
+                message = (
+                    "등록되지 않은 그룹입니다."
+                )
+            else :
+                database.delete(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP'] + '/' + str(groupId))
+                message = (
+                    "현재 그룹 등록을 해제했습니다." "\n"
+                    "/" + CMD['START'] + " 명령어로 다시 등록할 수 있습니다."
+                )
+        
+            context.bot.send_message(chat_id=groupId, text=message, reply_to_message_id=messageId)
+            # 메세지는 USER쪽 데이터 기준으로 전송, 어차피 항상 같이 동작하니 큰 문제는 없을듯...
+
+    def stop(self, update, context) :
+        if update.effective_chat.type == "private" :
+            database = self.database
+        
+            CMD = self.CMD
+            URL = self.URL
+
+            senderId = update.effective_chat.id
+            senderMessage = update.message.text
+
+            
+            if senderMessage == ("/" + CMD['STOP'] + " ALL") :
+                # registered_group 통해서, GROUP 쪽에 등록된 사용자 아이디 모두 지우기
+                ''' GROUP쪽 데이터 삭제 '''
+                storedRegisteredGroups = database.get(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP'])
+
+                if storedRegisteredGroups == None :
+                    pass
+                else :
+                    # 비효율의 끝..?
+                    for eachGroupId, val in storedRegisteredGroups.items() :
+                        # USER에 저장된 groupId를 가지고, GROUP쪽을 돌면서 삭제함
+                        storedGroupUsers = database.get(URL['GROUP'] + '/' + str(eachGroupId) + URL['USER'])
+                        if storedGroupUsers == None :
+                            storedGroupUsers = {}
+
+                        if str(senderId) not in storedGroupUsers.values() :
+                            pass
+                        else :
+                            for key, val in storedGroupUsers.items() :
+                                if val == str(senderId) :
+                                    database.delete(URL['GROUP'] + '/' + str(eachGroupId) + URL['USER'] + '/' + key)
+                                    break
+
+                ''' USER쪽 데이터 삭제 '''
+                database.delete(URL['USER'] + '/' + str(senderId))
+                message = (
+                    "사용자 정보를 모두 삭제헀습니다." "\n"
+                    "/" + CMD['START'] + " 명령어로 언제든 봇을 다시 이용할 수 있습니다."
+                )
+            else :
+                message = (
+                    "봇에 등록된 사용자 정보를 모두 삭제하는 명령어입니다." "\n"
+                    "데이터를 모두 삭제하시려면 /" + CMD['STOP'] + " ALL 을 입력해주세요." "\n"
+                    "삭제된 키워드 정보는 복구되지 않습니다."
+                )
+            context.bot.send_message(chat_id=senderId, text=message)
 
     def help_(self, update, context) :
         if update.effective_chat.type == "private" :
