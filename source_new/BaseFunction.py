@@ -25,9 +25,6 @@ class BaseFunction :
         elif update.effective_chat.type == "group" :
             database = self.database
             
-            URL = self.URL
-            KEY = self.KEY
-
             senderId = update.message.from_user.id
             messageId = update.message.message_id
 
@@ -38,30 +35,23 @@ class BaseFunction :
 
             ''' GROUP 쪽 데이터 작업 '''
             # 그룹 신규 등록 or 그룹 이름 최신화
-            database.update(URL['GROUP'] + '/' + str(groupId) + URL['INFO'],
-                { KEY['GROUPNAME'] : groupName }
-            )
+            database.setGroupName(groupId, groupName)
+            
             # Todo#3
-            storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER']) # GROUP쪽에 등록된 사용자 목록
-            if storedGroupUsers == None :
-                storedGroupUsers = {}
+            storedGroupUsers = database.getUserDictFromGroup(groupId) # GROUP쪽에 등록된 사용자 목록
 
             if str(senderId) not in storedGroupUsers.values() :
                 # 신규 등록
-                database.push(URL['GROUP'] + '/' + str(groupId) + URL['USER'], str(senderId))
+                database.addUserToGroup(senderId, groupId)
             else :
                 pass
 
             ''' USER 쪽 데이터 '''
-            storedRegisteredGroups = database.get(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP']) # USER쪽에 등록된 그룹 목록
-            if storedRegisteredGroups == None :
-                storedRegisteredGroups = {}
+            storedRegisteredGroups = database.getGroupDictFromUser(senderId)
 
             if str(groupId) not in storedRegisteredGroups.keys() :
                 # 신규 등록
-                database.update(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP'],
-                    { str(groupId) : True }
-                )
+                database.addGroupToUser(groupId, senderId)
                 message = (
                     "현재 그룹을 키워드 알림 봇에 등록합니다." "\n"
                     "기타 명령어는 봇과의 개인 대화에서만 작동합니다."
@@ -87,7 +77,6 @@ class BaseFunction :
             database = self.database
         
             CMD = self.CMD
-            URL = self.URL
 
             senderId = update.message.from_user.id
             messageId = update.message.message_id
@@ -95,30 +84,25 @@ class BaseFunction :
             groupId = update.effective_chat.id
 
             ''' GROUP쪽 데이터 삭제 '''
-            # Todo#3
-            storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER'])
-            if storedGroupUsers == None :
-                storedGroupUsers = {} # None 반환되어 아래 조건문 에러나는것 방지
+            storedGroupUsers = database.getUserDictFromGroup(groupId)
 
             if str(senderId) not in storedGroupUsers.values() :
                 pass
             else : 
                 for key, val in storedGroupUsers.items() :
                     if val == str(senderId) :
-                        database.delete(URL['GROUP'] + '/' + str(groupId) + URL['USER'] + '/' + key)
+                        database.deleteUserFromGroup(key, groupId)
                         break
 
             ''' USER쪽 데이터 삭제 '''
-            storedRegisteredGroups = database.get(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP'])
-            if storedRegisteredGroups == None :
-                storedRegisteredGroups = {}
+            storedRegisteredGroups = database.getGroupDictFromUser(senderId)
             
             if str(groupId) not in storedRegisteredGroups.keys() :
                 message = (
                     "등록되지 않은 그룹입니다."
                 )
             else :
-                database.delete(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP'] + '/' + str(groupId))
+                database.deleteGroupFromUser(groupId, senderId)
                 message = (
                     "현재 그룹 등록을 해제했습니다." "\n"
                     "/" + CMD['START'] + " 명령어로 다시 등록할 수 있습니다."
@@ -132,7 +116,6 @@ class BaseFunction :
             database = self.database
         
             CMD = self.CMD
-            URL = self.URL
 
             senderId = update.effective_chat.id
             senderMessage = update.message.text
@@ -141,28 +124,27 @@ class BaseFunction :
             if senderMessage == ("/" + CMD['STOP'] + " ALL") :
                 # registered_group 통해서, GROUP 쪽에 등록된 사용자 아이디 모두 지우기
                 ''' GROUP쪽 데이터 삭제 '''
-                storedRegisteredGroups = database.get(URL['USER'] + '/' + str(senderId) + URL['REGISTERED_GROUP'])
+                storedRegisteredGroups = database.getGroupDictFromUser(senderId)
 
-                if storedRegisteredGroups == None :
+                if len(storedRegisteredGroups) == 0 :
                     pass
                 else :
                     # 비효율의 끝..?
                     for eachGroupId, val in storedRegisteredGroups.items() :
                         # USER에 저장된 groupId를 가지고, GROUP쪽을 돌면서 삭제함
-                        storedGroupUsers = database.get(URL['GROUP'] + '/' + str(eachGroupId) + URL['USER'])
-                        if storedGroupUsers == None :
-                            storedGroupUsers = {}
+                        storedGroupUsers = database.getUserDictFromGroup(eachGroupId)
 
                         if str(senderId) not in storedGroupUsers.values() :
                             pass
                         else :
                             for key, val in storedGroupUsers.items() :
                                 if val == str(senderId) :
-                                    database.delete(URL['GROUP'] + '/' + str(eachGroupId) + URL['USER'] + '/' + key)
+                                    database.deleteUserFromGroup(key, eachGroupId)
                                     break
 
                 ''' USER쪽 데이터 삭제 '''
-                database.delete(URL['USER'] + '/' + str(senderId))
+                database.deleteUser(senderId)
+
                 message = (
                     "사용자 정보를 모두 삭제헀습니다." "\n"
                     "/" + CMD['START'] + " 명령어로 언제든 봇을 다시 이용할 수 있습니다."
@@ -209,40 +191,30 @@ class BaseFunction :
         groupId = update.effective_chat.id
 
         ''' GROUP쪽 데이터 삭제 '''
-        # Todo#3
-        storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER'])
-        if storedGroupUsers == None :
-            storedGroupUsers = {}
+        storedGroupUsers = database.getUserDictFromGroup(groupId)
         
         if str(leftMemberId) not in storedGroupUsers.values() :
             pass
         else :
             for key, val in storedGroupUsers.items() :
                 if val == str(leftMemberId) :
-                    database.delete(URL['GROUP'] + '/' + str(leftMemberId) + URL['USER'] + '/' + key)
+                    database.deleteUserFromGroup(key, groupId)
                     break
         
         ''' USER쪽 데이터 삭제 '''
-        storedRegisteredGroups = database.get(URL['USER'] + '/' + str(leftMemberId) + URL['REGISTERED_GROUP'])
-        if storedRegisteredGroups == None :
-            storedRegisteredGroups = {}
+        storedRegisteredGroups = database.getGroupDictFromUser(leftMemberId)
         
         if str(groupId) not in storedRegisteredGroups.keys() :
             pass
         else :
-            database.delete(URL['USER'] + '/' + str(leftMemberId) + URL['REGISTERED_GROUP'] + '/' + str(groupId))
+            database.deleteGroupFromUser(groupId, leftMemberId)
 
     def newChatTitle(self, update, context) : # 어차피 그룹 채팅에서만 작동
         database = self.database
         
-        URL = self.URL
-        KEY = self.KEY
-
         groupId = update.effective_chat.id
         newGroupName = update.message.new_chat_title
 
-        database.get(URL['GROUP'] + '/' + str(groupId) + URL['INFO'],
-            { KEY['GROUPNAME'] : newGroupName }
-        )
+        database.setGroupName(groupId, newGroupName)
         # 이름 갱신
 

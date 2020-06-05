@@ -8,7 +8,9 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 class FirebaseConnect :
     def __init__(self, config) :
-        
+        self.URL = config['URL']
+        self.KEY = config['KEY']
+
         FIREBASE_URL = config['FIREBASE']['URL']
         FIREBASE_CERTPATH = config['FIREBASE']['CERTPATH']
 
@@ -29,3 +31,67 @@ class FirebaseConnect :
     def delete(self, url) :
         db.reference(url).delete()
     
+    
+    ''' preset '''
+    def getKeywordList(self, userId) :
+        URL = self.URL
+
+        keywords = self.get(URL['USER'] + '/' + str(userId) + URL['KEYWORD'])
+        if keywords == None :
+            return []
+        else :
+            return list(keywords.values())
+
+    # Todo#3    
+    def getUserDictFromGroup(self, groupId) :
+        URL = self.URL
+
+        users = self.get(URL['GROUP'] + '/' + str(groupId) + URL['USER'])
+        if users == None :
+            return {}
+        else :
+            return users
+
+    def addUserToGroup(self, userId, groupId) :
+        URL = self.URL
+
+        self.push(URL['GROUP'] + '/' + str(groupId) + URL['USER'], str(userId))
+
+    def deleteUserFromGroup(self, userId_key, groupId) :
+        URL = self.URL
+
+        self.delete(URL['GROUP'] + '/' + str(groupId) + URL['USER'] + '/' + str(userId_key))
+
+    def getGroupDictFromUser(self, userId) :
+        URL = self.URL
+        
+        groups = self.get(URL['USER'] + '/' + str(userId) + URL['REGISTERED_GROUP'])
+        if groups == None :
+            return {}
+        else :
+            return groups
+
+    def addGroupToUser(self, groupId, userId) :
+        URL = self.URL
+
+        self.update(URL['USER'] + '/' + str(userId) + URL['REGISTERED_GROUP'],
+            { str(groupId) : True }
+        )
+
+    def deleteGroupFromUser(self, groupId, userId) :
+        URL = self.URL
+
+        self.delete(URL['USER'] + '/' + str(userId) + URL['REGISTERED_GROUP'] + '/' + str(groupId))
+
+    def deleteUser(self, userId) :
+        URL = self.URL
+        
+        self.delete(URL['USER'] + '/' + str(userId))
+
+    def setGroupName(self, groupId, groupName) :
+        URL = self.URL
+        KEY = self.KEY
+
+        self.update(URL['GROUP'] + '/' + str(groupId) + URL['INFO'],
+            { KEY['GROUPNAME'] : groupName }
+        )
