@@ -125,3 +125,33 @@ class KeywordFunction :
                     )
                 
             context.bot.send_message(chat_id=senderId, text=message)
+
+    # 키워드 대조하는 함수, MessageHandler에 추가됨
+    # 여기는 대화 한번마다 작동을함..
+    def isKeywordUsed(self, update, context) :
+        if update.effective_chat.type == 'group' :
+            database = self.database
+
+            URL = self.URL
+
+            senderId = update.message.from_user.id
+            groupId = update.effective_chat.id
+            messageId = update.message.message_id
+
+            # 그룹에 있는 사용자를 먼저 조회하기
+            storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER'])
+            if storedGroupUsers == None :
+                # 등록된 사용자가 없으면 함수 종료
+                return
+            
+            # 그룹에 등록된 각 사용자의 키워드 정보를 확인하기
+            for user in storedGroupUsers.values() :
+                
+                # keywords = database.get(URL['USER'] + '/' + str(senderId) + URL['KEYWORD'])
+                print(database.getKeywordList(user))
+            
+            
+
+
+
+

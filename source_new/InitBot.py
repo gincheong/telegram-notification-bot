@@ -64,6 +64,7 @@ class TelegramBot :
         self.addCommandHandler(CMD['KADD'], keywordFunction.kadd)
         self.addCommandHandler(CMD['KLIST'], keywordFunction.klist)
         self.addCommandHandler(CMD['KDEL'], keywordFunction.kdel)
+        self.addMessageHandler(keywordFunction.isKeywordUsed)
 
         # Group Function 불러오기
         groupFunction = GroupFunction(config, database)
@@ -78,10 +79,3 @@ class TelegramBot :
         self.addCommandHandler(CMD['STOP'], baseFunction.stop)
         self.addLeftChatMemberHandler(baseFunction.leftChatMember)
         self.addNewChatTitleHandler(baseFunction.newChatTitle)
-
-        # Debug Functions, debug=True 시에만 실행
-        if debug :
-            from DebugFunction import DebugFunction
-            debugFunction = DebugFunction()
-            
-            self.addMessageHandler(debugFunction.getMessageData)
