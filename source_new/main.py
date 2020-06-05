@@ -14,4 +14,4 @@ if __name__ == "__main__":
     config.read(CONFIG_PATH, encoding="utf-8")
     TOKEN = config['BOT']['TOKEN']
 
-    bot = TelegramBot(TOKEN, CONFIG_PATH, debug=True)
+    bot = TelegramBot(TOKEN, CONFIG_PATH)
