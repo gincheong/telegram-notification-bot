@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 
 import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
 class KeywordFunction :
     def __init__(self, config, database) :
@@ -11,7 +11,7 @@ class KeywordFunction :
         self.KEY = config['KEY']
         self.CMD = config['CMD']
 
-    def getFullname(self, update) :
+    def getFullName(self, update) :
         firstName = update.message.from_user.first_name
         try :
             lastName = update.message.from_user.last_name
@@ -33,7 +33,6 @@ class KeywordFunction :
         if update.effective_chat.type == "private" :
             database = self.database
 
-            URL = self.URL
             CMD = self.CMD
 
             senderId = update.effective_chat.id
@@ -47,12 +46,12 @@ class KeywordFunction :
                     "(\"예나\" 키워드를 추가)" 
                 )
             else :
-                storedKeywords = database.get(URL['USER'] + '/' + str(senderId) + URL['KEYWORD'])
+                storedKeywords = database.getKeywordDict(senderId)
 
-                if (storedKeywords == None or # 키워드 초기 등록이거나
-                    commandInput not in storedKeywords.values()) : # 새 키워드인 경우
+                # 키워드 초기 등록이거나, 새로운 키워드 등록인 경우
+                if commandInput not in storedKeywords.values() :
                     
-                    database.push(URL['USER'] + '/' + str(senderId) + URL['KEYWORD'], commandInput)
+                    database.addKeywordToUser(commandInput, senderId)
                     
                     message = (
                         commandInput + " 키워드를 추가했습니다."
@@ -69,13 +68,11 @@ class KeywordFunction :
         if update.effective_chat.type == "private" :
             database = self.database
             
-            URL = self.URL
-
             senderId = update.effective_chat.id
             
-            storedKeywords = database.get(URL['USER'] + '/' + str(senderId) + URL['KEYWORD'])
+            storedKeywords = database.getKeywordDict(senderId)
 
-            if storedKeywords == None :
+            if len(storedKeywords) == 0 :
                 message = (
                     "등록된 키워드가 없습니다."
                 )
@@ -90,7 +87,6 @@ class KeywordFunction :
         if update.effective_chat.type == "private" :
             database = self.database
 
-            URL = self.URL
             CMD = self.CMD
 
             senderId = update.effective_chat.id
@@ -104,10 +100,10 @@ class KeywordFunction :
                     "(\"예나\" 키워드를 삭제)" 
                 )
             else :
-                storedKeywords = database.get(URL['USER'] + '/' + str(senderId) + URL['KEYWORD'])
+                storedKeywords = database.getKeywordDict(senderId)
 
                 # 삭제 실패
-                if storedKeywords == None :
+                if len(storedKeywords) == 0 :
                     message = (
                         "등록된 키워드가 없습니다."
                     )
@@ -118,7 +114,7 @@ class KeywordFunction :
                 else :
                     for key, val in storedKeywords.items() :
                         if val == commandInput :
-                            database.delete(URL['USER'] + '/' + str(senderId) + URL['KEYWORD'] + '/' + key)
+                            database.deleteKeyword(key, senderId)
                             break
                     message = (
                         commandInput + " 키워드를 삭제했습니다."
@@ -126,17 +122,20 @@ class KeywordFunction :
                 
             context.bot.send_message(chat_id=senderId, text=message)
 
-    # 키워드 대조하는 함수, MessageHandler에 추가됨
-    # 여기는 대화 한번마다 작동을함..
+    # 키워드 대조하는 함수, MessageHandler에 추가되어 매 채팅마다 실행됨
     def isKeywordUsed(self, update, context) :
+        # 키워드 알림은 그룹 채팅에서만 작동합니다
         if update.effective_chat.type == 'group' :
             database = self.database
 
             URL = self.URL
 
             senderId = update.message.from_user.id
-            groupId = update.effective_chat.id
+            senderMessage = update.message.text
+            senderName = self.getFullName(update)
             messageId = update.message.message_id
+            groupId = update.effective_chat.id
+            groupName = update.effective_chat.title
 
             # 그룹에 있는 사용자를 먼저 조회하기
             storedGroupUsers = database.get(URL['GROUP'] + '/' + str(groupId) + URL['USER'])
@@ -147,11 +146,36 @@ class KeywordFunction :
             # 그룹에 등록된 각 사용자의 키워드 정보를 확인하기
             for user in storedGroupUsers.values() :
                 
-                # keywords = database.get(URL['USER'] + '/' + str(senderId) + URL['KEYWORD'])
-                print(database.getKeywordList(user))
+                # 본인의 대화에는 키워드 감지를 하지 않음
+                if user == str(senderId) :
+                    continue
+
+                keywords = database.getKeywordDict(user).values()
+
+                usedKeyword = self.isKeywordInMessage(keywords, senderMessage)
+                if usedKeyword == False :
+                    pass
+                else :
+                    message = (
+                        "{} 님이 호출했습니다.".format(senderName) + "\n"
+                        "그룹 이름 : {}".format(groupName) + "\n"
+                        "메세지 내용 : {}".format(senderMessage)
+                    )
+
+                    # 알림 메세지 사용자에게 전송
+                    try :
+                        context.bot.send_message(chat_id=user, text=message)
+                    except Exception as e :
+                        print(e)
+
             
-            
-
-
-
-
+    def isKeywordInMessage(self, keywords, message) :
+        # 키워드가 메시지에 있는지 확인
+        
+        message = message.lower() # 대소문자를 구분하지 않음
+        for keyword in keywords :
+            if keyword in message :
+                # 키워드가 발견되면, 발견된 키워드를 반환
+                return keyword
+        # 발견된 키워드 없으면 False 반환        
+        return False

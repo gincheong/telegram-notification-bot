@@ -33,14 +33,16 @@ class FirebaseConnect :
     
     
     ''' preset '''
-    def getKeywordList(self, userId) :
+
+    ''' GET '''
+    def getKeywordDict(self, userId) :
         URL = self.URL
 
         keywords = self.get(URL['USER'] + '/' + str(userId) + URL['KEYWORD'])
         if keywords == None :
-            return []
+            return {}
         else :
-            return list(keywords.values())
+            return keywords
 
     # Todo#3    
     def getUserDictFromGroup(self, groupId) :
@@ -52,16 +54,6 @@ class FirebaseConnect :
         else :
             return users
 
-    def addUserToGroup(self, userId, groupId) :
-        URL = self.URL
-
-        self.push(URL['GROUP'] + '/' + str(groupId) + URL['USER'], str(userId))
-
-    def deleteUserFromGroup(self, userId_key, groupId) :
-        URL = self.URL
-
-        self.delete(URL['GROUP'] + '/' + str(groupId) + URL['USER'] + '/' + str(userId_key))
-
     def getGroupDictFromUser(self, userId) :
         URL = self.URL
         
@@ -71,12 +63,43 @@ class FirebaseConnect :
         else :
             return groups
 
+    def getGroupName(self, groupId) :
+        URL = self.URL
+        KEY = self.KEY
+
+        return self.get(URL['GROUP'] + '/' + str(groupId) + URL['INFO'] + '/' + KEY['GROUPNAME'])
+
+    ''' ADD, UPDATE '''
+    def addUserToGroup(self, userId, groupId) :
+        URL = self.URL
+
+        self.push(URL['GROUP'] + '/' + str(groupId) + URL['USER'], str(userId))
+
     def addGroupToUser(self, groupId, userId) :
         URL = self.URL
 
         self.update(URL['USER'] + '/' + str(userId) + URL['REGISTERED_GROUP'],
             { str(groupId) : True }
         )
+
+    def addKeywordToUser(self, keyword, userId) :
+        URL = self.URL
+
+        self.push(URL['USER'] + '/' + str(userId) + URL['KEYWORD'], keyword)
+
+    def setGroupName(self, groupId, groupName) :
+        URL = self.URL
+        KEY = self.KEY
+
+        self.update(URL['GROUP'] + '/' + str(groupId) + URL['INFO'],
+            { KEY['GROUPNAME'] : groupName }
+        )
+
+    ''' DELETE '''
+    def deleteUserFromGroup(self, userId_key, groupId) :
+        URL = self.URL
+
+        self.delete(URL['GROUP'] + '/' + str(groupId) + URL['USER'] + '/' + str(userId_key))
 
     def deleteGroupFromUser(self, groupId, userId) :
         URL = self.URL
@@ -88,10 +111,7 @@ class FirebaseConnect :
         
         self.delete(URL['USER'] + '/' + str(userId))
 
-    def setGroupName(self, groupId, groupName) :
+    def deleteKeyword(self, keyword_key, userId) :
         URL = self.URL
-        KEY = self.KEY
 
-        self.update(URL['GROUP'] + '/' + str(groupId) + URL['INFO'],
-            { KEY['GROUPNAME'] : groupName }
-        )
+        self.delete(URL['USER'] + '/' + str(userId) + URL['KEYWORD'] + '/' + keyword_key)

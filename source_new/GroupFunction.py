@@ -15,14 +15,11 @@ class GroupFunction :
         if update.effective_chat.type == "private" :
             database = self.database
 
-            URL = self.URL
-            KEY = self.KEY
-
             senderId = update.effective_chat.id
 
-            storedGroups = database.get(URL['USER'] + '/' + str(senderId) + '/' + URL['REGISTERED_GROUP'], shallow=True)
+            storedGroups = database.getGroupDictFromUser(senderId)
 
-            if storedGroups == None :
+            if len(storedGroups) == 0 :
                 message = (
                     "등록된 그룹이 없습니다."
                 )
@@ -30,7 +27,7 @@ class GroupFunction :
                 groupNameList = []
                 for groupId in storedGroups.keys() : # key쪽에 id가 입력됨
                     # find groupname
-                    groupName = database.get(URL['GROUP'] + '/' + str(groupId) + URL['INFO'] + '/' + KEY['GROUPNAME'])
+                    groupName = database.getGroupName(groupId)
                     groupNameList.append(groupName)
                 message = (
                     "등록된 그룹 목록입니다." "\n" +
