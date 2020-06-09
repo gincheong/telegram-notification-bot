@@ -65,7 +65,8 @@ class TelegramBot :
 
             errorLog = traceback.format_exc()
             self.logger.error(errorLog)
-            context.bot.send_message(chat_id=adminId, text=errorLog) # 에러 발생하면 나한테 전송함
+            context.bot.send_message(chat_id=adminId, text=errorLog, disable_notification=True)
+            # 에러 발생하면 나한테 전송함
 
     def initHandler(self) :
         logger = self.logger
