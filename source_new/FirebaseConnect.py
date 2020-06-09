@@ -3,9 +3,6 @@ from firebase_admin import db, credentials
 
 from configparser import ConfigParser
 
-import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
 class FirebaseConnect :
     def __init__(self, config) :
         self.URL = config['URL']
