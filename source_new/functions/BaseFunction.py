@@ -1,11 +1,9 @@
 from configparser import ConfigParser
 
-import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
 class BaseFunction :
-    def __init__(self, config, database) :
+    def __init__(self, config, database, logger) :
         self.database = database
+        self.logger = logger
         
         self.URL = config['URL']
         self.KEY = config['KEY']
@@ -15,6 +13,23 @@ class BaseFunction :
         # Private Chat
         if update.effective_chat.type == "private" :
             senderId = update.effective_chat.id
+
+            message = (
+                "키워드 감지를 위해 봇이 메시지에 접근할 수 있습니다. (Group Privacy Disabled)" "\n"
+                "키워드 감지 시에만 메세지 내용에 접근하며, 내용은 절대 기록하지 않습니다." "\n"
+                "봇은 지난 메시지에 접근할 권한이 없습니다." "\n"
+                "데이터베이스에는 그룹 이름만이 저장되며, 기타 사용자 이름이나 메세지 등은 저장되지 않습니다." "\n"
+                "키워드 데이터는 암호화하지 않고 저장하므로 중요한 개인정보를 입력하지 마세요."
+            )
+            context.bot.send_message(chat_id=senderId, text=message)
+
+            message = (
+                'Github : <a href="https://github.com/gincheong/telegram-notification-bot">telegram-notification-bot</a>' "\n"
+                "Telegram : @gincheong" "\n"
+                "오류 발생 시 텔레그램으로 문의 바랍니다."
+            )
+            context.bot.send_message(chat_id=senderId, text=message, disable_web_page_preview=True, parse_mode="html")
+
             message = (
                 "내가 등록한 키워드가 그룹 채팅방에서 사용되면, 봇이 메시지를 전송합니다." "\n"
                 "/howto 명령어로 사용방법을 확인하세요."
@@ -56,6 +71,7 @@ class BaseFunction :
                     "현재 그룹을 키워드 알림 봇에 등록합니다." "\n"
                     "기타 명령어는 봇과의 개인 대화에서만 작동합니다."
                 )
+                self.logger.info("New Group Added : uid:{}, gid:{}".format(senderId, groupId))
             else :
                 message = (
                     "이미 등록된 그룹입니다." "\n"
@@ -144,6 +160,7 @@ class BaseFunction :
 
                 ''' USER쪽 데이터 삭제 '''
                 database.deleteUser(senderId)
+                self.logger.info("Delete User Data : uid:{}".format(senderId))
 
                 message = (
                     "사용자 정보를 모두 삭제헀습니다." "\n"
@@ -162,10 +179,25 @@ class BaseFunction :
             # only available in private chat
             CMD = self.CMD
             senderId = update.effective_chat.id
+            
+            # 그룹 채팅방과 개인 채팅방 명령어를 나누기
             message = (
+                "[개인 채팅 내 명령어]" "\n"
                 "/" + CMD['KADD'] + " <i>[keyword]</i> : 알람을 받을 키워드를 추가합니다." "\n"
-                "/" + CMD['KDEL'] + " <i>[keyword]</i> : 등록된 키워드를 삭제합니다." "\n"
-                "/" + CMD['KLIST'] + " : 등록된 키워드를 표시합니다."
+                "/" + CMD['KDEL'] + " <i>[keyword]</i> : 등록된 키워드를 삭제합니다." "\n" 
+                "/" + CMD['KLIST'] + " : 등록된 키워드를 표시합니다." "\n"
+                "/" + CMD['GLIST'] + " : 등록된 그룹을 표시합니다." "\n"
+                "/" + CMD['HELP'] + " : 현재 메세지를 표시합니다." "\n"
+                "/" + CMD['HOWTO'] + " : 간단한 봇 사용법을 표시합니다." "\n"
+                "/" + CMD['STOP'] + " : 봇에 등록된 사용자 정보를 모두 삭제합니다." "\n"
+                "/" + CMD['START'] + " : 봇에 대한 설명을 볼 수 있습니다."
+            )
+            context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
+            
+            message = (
+                "[그룹 채팅 내 명령어]" "\n"
+                "/" + CMD['START'] + " : 현재 그룹을 봇에 등록합니다." "\n"
+                "/" + CMD['DELETE'] + " : 현재 그룹을 봇에서 등록 해제합니다."
             )
             context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
 
@@ -184,8 +216,6 @@ class BaseFunction :
     def leftChatMember(self, update, context) : # 어차피 그룹 채팅에서만 작동?
         # 사용자가 그룹에서 나가면, 그 사용자의 그룹 등록 정보를 삭제함
         database = self.database
-
-        URL = self.URL
 
         leftMemberId = update.message.left_chat_member.id
         groupId = update.effective_chat.id
