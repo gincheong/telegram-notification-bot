@@ -1,3 +1,4 @@
+import traceback
 import telegram
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
@@ -5,17 +6,15 @@ from telegram.ext import CallbackContext
 
 from configparser import ConfigParser
 
-from BaseFunction import BaseFunction
-from KeywordFunction import KeywordFunction
-from GroupFunction import GroupFunction
+from Functions import Functions
 from FirebaseConnect import FirebaseConnect
 
-
-import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+from Logger import Logger
 
 class TelegramBot :
-    def __init__(self, token, configPath, debug=False) :
+    def __init__(self, token, configPath, logger) :
+        self.logger = logger
+
         config = ConfigParser()
         config.read(configPath, encoding="utf-8")
         self.config = config
@@ -23,12 +22,16 @@ class TelegramBot :
         self.updater = Updater(token, use_context=True)
         self.dispatcher = self.updater.dispatcher
 
-        print('Init Handlers.')
-        self.initHandler(debug=debug)
+        print('Init Handlers')
+        logger.info("Init Handlers")
+        self.initHandler()
 
         print('Booting Bot ...')
+        logger.info("Booting Bot ...")
+        
         self.updater.start_polling()
         self.updater.idle()
+        logger.info("Bot Exited ...")
         
 
     def addCommandHandler(self, command, callback) :
@@ -52,30 +55,46 @@ class TelegramBot :
         handler = MessageHandler(Filters.status_update.new_chat_title, callback)
         dispatcher.add_handler(handler)
 
-    # def addErrorHandler(self, command, callback) :
+    def errorHandler(self, update, context) :
+        adminId = self.config['ADMIN']['ID']
 
-    def initHandler(self, debug) :
+        try :
+            raise context.error
+        except Exception :
+            self.logger.error(update.effective_chat) # 어차피 gid, mid 등으로 메세지 트래킹은 할 수 없긴 함
+
+            errorLog = traceback.format_exc()
+            self.logger.error(errorLog)
+            context.bot.send_message(chat_id=adminId, text=errorLog) # 에러 발생하면 나한테 전송함
+
+    def initHandler(self) :
+        logger = self.logger
         config = self.config
         CMD = config['CMD']
         database = FirebaseConnect(config)
+        functions = Functions(config, database, logger)
 
         # keyword Function 불러오기
-        keywordFunction = KeywordFunction(config, database)
+        keywordFunction = functions.keyword
         self.addCommandHandler(CMD['KADD'], keywordFunction.kadd)
-        self.addCommandHandler(CMD['KLIST'], keywordFunction.klist)
         self.addCommandHandler(CMD['KDEL'], keywordFunction.kdel)
+        self.addCommandHandler(CMD['KLIST'], keywordFunction.klist)
         self.addMessageHandler(keywordFunction.isKeywordUsed)
 
         # Group Function 불러오기
-        groupFunction = GroupFunction(config, database)
+        groupFunction = functions.group
         self.addCommandHandler(CMD['GLIST'], groupFunction.glist)
 
-        # Base Functions
-        baseFunction = BaseFunction(config, database)
+        # Base Functions 불러오기
+        baseFunction = functions.base
         self.addCommandHandler(CMD['START'], baseFunction.start)
         self.addCommandHandler(CMD['HELP'], baseFunction.help_)
         self.addCommandHandler(CMD['HOWTO'], baseFunction.howto)
         self.addCommandHandler(CMD['DELETE'], baseFunction.delete)
         self.addCommandHandler(CMD['STOP'], baseFunction.stop)
+        
         self.addLeftChatMemberHandler(baseFunction.leftChatMember)
         self.addNewChatTitleHandler(baseFunction.newChatTitle)
+
+        # Error Handler
+        self.dispatcher.add_error_handler(self.errorHandler)
