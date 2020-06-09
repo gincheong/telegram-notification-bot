@@ -3,8 +3,7 @@ from FirebaseConnect import FirebaseConnect
 
 from configparser import ConfigParser # read ini files
 
-import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+from Logger import Logger
 
 if __name__ == "__main__":
 
@@ -12,6 +11,9 @@ if __name__ == "__main__":
 
     config = ConfigParser()
     config.read(CONFIG_PATH, encoding="utf-8")
+    
     TOKEN = config['BOT']['TOKEN']
 
-    bot = TelegramBot(TOKEN, CONFIG_PATH)
+    LOGGER = Logger(config).getInstance()
+
+    bot = TelegramBot(TOKEN, CONFIG_PATH, LOGGER)

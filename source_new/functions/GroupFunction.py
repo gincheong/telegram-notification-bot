@@ -1,11 +1,9 @@
 from configparser import ConfigParser
 
-import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
 class GroupFunction :
-    def __init__(self, config, database) :
+    def __init__(self, config, database, logger) :
         self.database = database
+        self.logger = logger
         
         self.URL = config['URL']
         self.KEY = config['KEY']

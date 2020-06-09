@@ -1,11 +1,9 @@
 from configparser import ConfigParser
 
-import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-
 class KeywordFunction :
-    def __init__(self, config, database) :
+    def __init__(self, config, database, logger) :
         self.database = database
+        self.logger = logger
         
         self.URL = config['URL']
         self.KEY = config['KEY']
@@ -163,10 +161,8 @@ class KeywordFunction :
                     )
 
                     # 알림 메세지 사용자에게 전송
-                    try :
-                        context.bot.send_message(chat_id=user, text=message)
-                    except Exception as e :
-                        print(e)
+                    context.bot.send_message(chat_id=user, text=message, disable_web_page_preview=True)
+                    self.logger.info("Notifications : uid:{}, gid:{}, mid:{}".format(user, groupId, messageId))
 
             
     def isKeywordInMessage(self, keywords, message) :
