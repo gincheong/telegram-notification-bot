@@ -1,9 +1,19 @@
-import keyNoti
+from InitBot import TelegramBot
+from FirebaseConnect import FirebaseConnect
+
+from configparser import ConfigParser # read ini files
+
+from Logger import Logger
 
 if __name__ == "__main__":
 
-  bot_token = <BOT_TOKEN>
-  serviceAccountKey = <PATH/TO/KEY>
-  firebaseURL = <FIREBASE_URL>
+    CONFIG_PATH = 'config.ini'
 
-  keyNoti.keyNotiBot(bot_token, serviceAccountKey, firebaseURL).boot()
+    config = ConfigParser()
+    config.read(CONFIG_PATH, encoding="utf-8")
+    
+    TOKEN = config['BOT']['TOKEN']
+
+    LOGGER = Logger(config).getInstance()
+
+    bot = TelegramBot(TOKEN, CONFIG_PATH, LOGGER)
