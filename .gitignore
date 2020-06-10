@@ -1,8 +1,8 @@
-source/main_test.py
-source/log/
+source_old/main_test.py
+source_old/log/
 Firebase
 *.pyc
 *.ini
 *.md
-.log
-source_new/log/
+*.log
+source/log/
