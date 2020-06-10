@@ -23,7 +23,7 @@ Telegram : [@gincheong](https://t.me/gincheong)
 EMAIL : gincheong2@gmail.com  
 Blog : [Tistory](https://desree.tistory.com/33)
 
-[python-telegram-bot 11.1.0](https://github.com/python-telegram-bot/python-telegram-bot) (LGPLv3.0)
+[python-telegram-bot 12.7](https://github.com/python-telegram-bot/python-telegram-bot) (LGPLv3.0)
 firebase_admin 2.16.0 (Apache2.0)  
 python 3.6.7  
 program is running on AWS
