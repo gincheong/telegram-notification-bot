@@ -21,6 +21,7 @@ class GroupFunction :
                 message = (
                     "등록된 그룹이 없습니다."
                 )
+                self.logger.info("glist NoData : uid:{}".format(senderId))
             else :
                 groupNameList = []
                 for groupId in storedGroups.keys() : # key쪽에 id가 입력됨
@@ -31,5 +32,6 @@ class GroupFunction :
                     "등록된 그룹 목록입니다." "\n" +
                     "\n".join(groupNameList)
                 )
+                self.logger.info("glist Success : uid:{}".format(senderId))
 
             context.bot.send_message(chat_id=senderId, text=message)

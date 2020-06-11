@@ -35,6 +35,7 @@ class BaseFunction :
                 "/howto 명령어로 사용방법을 확인하세요."
             )
             context.bot.send_message(chat_id=senderId, text=message)
+            self.logger.info("start Help : uid:{}".format(senderId))
 
         # Group Chat
         elif update.effective_chat.type == "group" :
@@ -71,12 +72,13 @@ class BaseFunction :
                     "현재 그룹을 키워드 알림 봇에 등록합니다." "\n"
                     "기타 명령어는 봇과의 개인 대화에서만 작동합니다."
                 )
-                self.logger.info("New Group Added : uid:{}, gid:{}".format(senderId, groupId))
+                self.logger.info("start NewGroup : uid:{}, gid:{}".format(senderId, groupId))
             else :
                 message = (
                     "이미 등록된 그룹입니다." "\n"
                     "기타 명령어는 봇과의 개인 대화에서만 작동합니다."
                 )
+                self.logger.info("start Duplicated : uid:{}, gid:{}".format(senderId, groupId))
 
             context.bot.send_message(chat_id=groupId, text=message, reply_to_message_id=messageId)
             
@@ -87,6 +89,7 @@ class BaseFunction :
             message = (
                 "등록 해제를 원하는 그룹 채팅방에서 명령어를 입력해주세요."
             )
+            self.logger.info("delete Help : uid:{}".format(senderId))
             context.bot.send_message(chat_id=senderId, text=message)
 
         elif update.effective_chat.type == "group" :
@@ -117,12 +120,14 @@ class BaseFunction :
                 message = (
                     "등록되지 않은 그룹입니다."
                 )
+                self.logger.info("delete NoData : uid:{}, gid:{}".format(senderId, groupId))
             else :
                 database.deleteGroupFromUser(groupId, senderId)
                 message = (
                     "현재 그룹 등록을 해제했습니다." "\n"
                     "/" + CMD['START'] + " 명령어로 다시 등록할 수 있습니다."
                 )
+                self.logger.info("delete Success : uid:{}, gid:{}".format(senderId, groupId))
         
             context.bot.send_message(chat_id=groupId, text=message, reply_to_message_id=messageId)
             # 메세지는 USER쪽 데이터 기준으로 전송, 어차피 항상 같이 동작하니 큰 문제는 없을듯...
@@ -166,12 +171,14 @@ class BaseFunction :
                     "사용자 정보를 모두 삭제헀습니다." "\n"
                     "/" + CMD['START'] + " 명령어로 언제든 봇을 다시 이용할 수 있습니다."
                 )
+                self.logger.info("stop Success : uid:{}".format(senderId))
             else :
                 message = (
                     "봇에 등록된 사용자 정보를 모두 삭제하는 명령어입니다." "\n"
                     "데이터를 모두 삭제하시려면 /" + CMD['STOP'] + " ALL 을 입력해주세요." "\n"
                     "삭제된 키워드 정보는 복구되지 않습니다."
                 )
+                self.logger.info("stop Help : uid:{}".format(senderId))
             context.bot.send_message(chat_id=senderId, text=message)
 
     def help_(self, update, context) :
@@ -200,6 +207,7 @@ class BaseFunction :
                 "/" + CMD['DELETE'] + " : 현재 그룹을 봇에서 등록 해제합니다."
             )
             context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
+            self.logger.info("help Success : uid:{}".format(senderId))
 
     def howto(self, update, context) :
         if update.effective_chat.type == "private" :
@@ -212,6 +220,7 @@ class BaseFunction :
                 "다른 명령어는 /help 명령어로 확인할 수 있습니다."
             )
             context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
+            self.logger.info("howto Success : uid:{}".format(senderId))
 
     def leftChatMember(self, update, context) : # 어차피 그룹 채팅에서만 작동?
         # 사용자가 그룹에서 나가면, 그 사용자의 그룹 등록 정보를 삭제함
@@ -238,6 +247,7 @@ class BaseFunction :
             pass
         else :
             database.deleteGroupFromUser(groupId, leftMemberId)
+            self.logger.info("leftChatMember : uid:{}, gid:{}".format(leftMemberId, groupId))
 
     def newChatTitle(self, update, context) : # 어차피 그룹 채팅에서만 작동
         database = self.database
@@ -246,5 +256,6 @@ class BaseFunction :
         newGroupName = update.message.new_chat_title
 
         database.setGroupName(groupId, newGroupName)
+        self.logger.info("newChatTitle Success : gid:{}".format(groudId))
         # 이름 갱신
 

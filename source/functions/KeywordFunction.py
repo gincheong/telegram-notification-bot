@@ -43,6 +43,7 @@ class KeywordFunction :
                     "예시) /" + CMD['KADD'] + " 예나" "\n"
                     "(\"예나\" 키워드를 추가)" 
                 )
+                self.logger.info("kadd Help : uid:{}".format(senderId))
             else :
                 storedKeywords = database.getKeywordDict(senderId)
 
@@ -54,10 +55,12 @@ class KeywordFunction :
                     message = (
                         commandInput + " 키워드를 추가했습니다."
                     )
+                    self.logger.info("kadd Success : uid:{}, keyword:{}".format(senderId, commandInput))
                 else : # 중복 키워드를 등록하려는 경우
                     message = (
                         "이미 등록된 키워드입니다."
                     )
+                    self.logger.info("kadd Duplicated : uid:{}, keyword:{}".format(senderId, commandInput))
             
             context.bot.send_message(chat_id=senderId, text=message)
 
@@ -74,11 +77,13 @@ class KeywordFunction :
                 message = (
                     "등록된 키워드가 없습니다."
                 )
+                self.logger.info("klist NoData : uid:{}".format(senderId))
             else :
                 message = (
                     "등록된 키워드 목록입니다." "\n" + 
                     ", ".join(storedKeywords.values())
                 )
+                self.logger.info("klist Success : uid:{}".format(senderId))
             context.bot.send_message(chat_id=senderId, text=message)
 
     def kdel(self, update, context) :
@@ -97,6 +102,7 @@ class KeywordFunction :
                     "예시) /" + CMD['KDEL'] + " 예나" "\n"
                     "(\"예나\" 키워드를 삭제)" 
                 )
+                self.logger.info("kdel Help : uid:{}".format(senderId))
             else :
                 storedKeywords = database.getKeywordDict(senderId)
 
@@ -105,10 +111,12 @@ class KeywordFunction :
                     message = (
                         "등록된 키워드가 없습니다."
                     )
+                    self.logger.info("kdel NoData : uid:{}, keyword:{}".format(senderId, commandInput))
                 elif commandInput not in storedKeywords.values() :
                     message = (
                         "등록되지 않은 키워드입니다."
                     )
+                    self.logger.info("kdel NoKeyword : uid:{}, keyword:{}".format(senderId, commandInput))
                 else :
                     for key, val in storedKeywords.items() :
                         if val == commandInput :
@@ -117,6 +125,7 @@ class KeywordFunction :
                     message = (
                         commandInput + " 키워드를 삭제했습니다."
                     )
+                    self.logger.info("kdel Success : uid:{}, keyword:{}".format(senderId, commandInput))
                 
             context.bot.send_message(chat_id=senderId, text=message)
 
