@@ -272,7 +272,6 @@ class BaseFunction :
     def doNotDisturb(self, update, context) :
         if update.effective_chat.type == "private" :
             database = self.database
-            URL = self.URL
             CMD = self.CMD
             senderId = update.effective_chat.id
             senderMessage = update.message.text
@@ -298,7 +297,12 @@ class BaseFunction :
 
             elif commandInput == "off" :
                 # Off
-                database.setDoNotDisturb(senderId, "off")
+                database.setDoNotDisturb(senderId, "off", "off")
+                
+                message = (
+                    "방해금지 시간대 설정을 해제했습니다."
+                )
+                context.bot.send_message(chat_id=senderId, text=message)
                 self.logger.info("doNotDisturb Off : uid:{}".format(senderId))
 
             else :
@@ -308,8 +312,7 @@ class BaseFunction :
                     start, end = commandInput.split(" ")
 
                     # 숫자를 입력했는지 검증
-                    start = int(start)
-                    end = int(end)
+                    start, end = int(start), int(end)
 
                     # 0 ~ 24 시간을 입력했는지 검증
                     if start > 24 or start < 0 :

@@ -66,6 +66,15 @@ class FirebaseConnect :
 
         return self.get(URL['GROUP'] + '/' + str(groupId) + URL['INFO'] + '/' + KEY['GROUPNAME'])
 
+    def getDoNotDisturb(self, userId) :
+        URL = self.URL
+        KEY = self.KEY
+
+        start = self.get(URL['USER'] + '/' + str(userId) + URL['DONOTDISTURB'] + '/' + KEY['DONOTDISTURB_START'])
+        end = self.get(URL['USER'] + '/' + str(userId) + URL['DONOTDISTURB'] + '/' + KEY['DONOTDISTURB_END'])
+
+        return start, end
+
     ''' ADD, UPDATE '''
     def addUserToGroup(self, userId, groupId) :
         URL = self.URL
@@ -92,23 +101,16 @@ class FirebaseConnect :
             { KEY['GROUPNAME'] : groupName }
         )
 
-    def setDoNotDisturb(self, userId, start, end=None) :
-        # start, end는 int로 변환해서 가져옴
+    def setDoNotDisturb(self, userId, start, end) :
         URL = self.URL
         KEY = self.KEY
 
-        if start == "off" :
-            self.update(URL['USER'] + '/' + str(userId) + URL['DONOTDISTURB'],
-                { KEY['DONOTDISTURB_START'] : "off" }
-            )
-        
-        else :
-            self.update(URL['USER'] + '/' + str(userId) + URL['DONOTDISTURB'],
-                { KEY['DONOTDISTURB_START'] : start }
-            )
-            self.update(URL['USER'] + '/' + str(userId) + URL['DONOTDISTURB'],
-                { KEY['DONOTDISTURB_END'] : end }
-            )
+        self.update(URL['USER'] + '/' + str(userId) + URL['DONOTDISTURB'],
+            { KEY['DONOTDISTURB_START'] : start }
+        )
+        self.update(URL['USER'] + '/' + str(userId) + URL['DONOTDISTURB'],
+            { KEY['DONOTDISTURB_END'] : end }
+        )
 
     ''' DELETE '''
     def deleteUserFromGroup(self, userId_key, groupId) :
