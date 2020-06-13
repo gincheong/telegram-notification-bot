@@ -9,6 +9,14 @@ class BaseFunction :
         self.KEY = config['KEY']
         self.CMD = config['CMD']
 
+    def parseCommandInput(self, command, text) :
+        if text == ('/' + command) :
+            return ""
+        else :
+            commandInput = text[len(command) + 2 : ]
+            commandInput = commandInput.strip().lower() # 좌우 공백 제거, 소문자 변환
+            return commandInput
+
     def start(self, update, context) :
         # Private Chat
         if update.effective_chat.type == "private" :
@@ -197,7 +205,8 @@ class BaseFunction :
                 "/" + CMD['HELP'] + " : 현재 메세지를 표시합니다." "\n"
                 "/" + CMD['HOWTO'] + " : 간단한 봇 사용법을 표시합니다." "\n"
                 "/" + CMD['STOP'] + " : 봇에 등록된 사용자 정보를 모두 삭제합니다." "\n"
-                "/" + CMD['START'] + " : 봇에 대한 설명을 볼 수 있습니다."
+                "/" + CMD['START'] + " : 봇에 대한 설명을 볼 수 있습니다." "\n"
+                "/" + CMD['DONOTDISTURB'] + " : 방해 금지 시간대를 설정할 수 있습니다."
             )
             context.bot.send_message(chat_id=senderId, text=message, parse_mode="html")
             
@@ -259,3 +268,67 @@ class BaseFunction :
         self.logger.info("newChatTitle Success : gid:{}".format(groudId))
         # 이름 갱신
 
+
+    def doNotDisturb(self, update, context) :
+        if update.effective_chat.type == "private" :
+            database = self.database
+            URL = self.URL
+            CMD = self.CMD
+            senderId = update.effective_chat.id
+            senderMessage = update.message.text
+
+            commandInput = self.parseCommandInput(CMD['DONOTDISTURB'], senderMessage)
+
+            if commandInput == "" :
+                # Help
+                message = (
+                    "방해금지 시간대 설정 명령어입니다." "\n"
+                    "알람을 받지 \"않을\" 시간을 명령어와 함께 입력해주세요." "\n"
+                    "예시) /" + CMD['DONOTDISTURB'] + " 23 8" "\n"
+                    "(23시부터 8시까지 알람이 울리지 않음)"
+                )
+                context.bot.send_message(chat_id=senderId, text=message)
+
+                message = (
+                    "시간 단위로만 설정이 가능하며,"
+                    "방해금지 설정을 해제하고 싶은 경우 /" + CMD['DONOTDISTURB'] + " off 를 입력해주세요."
+                )
+                context.bot.send_message(chat_id=senderId, text=message)
+                self.logger.info("doNotDisturb Help : uid:{}".format(senderId))
+
+            elif commandInput == "off" :
+                # Off
+                database.setDoNotDisturb(senderId, "off")
+                self.logger.info("doNotDisturb Off : uid:{}".format(senderId))
+
+            else :
+                # 입력값 검증
+                try :
+                    # 입력값 수 검증
+                    start, end = commandInput.split(" ")
+
+                    # 숫자를 입력했는지 검증
+                    start = int(start)
+                    end = int(end)
+
+                    # 0 ~ 24 시간을 입력했는지 검증
+                    if start > 24 or start < 0 :
+                        raise ValueError
+                    if end > 24 or end < 0 :
+                        raise ValueError
+                except ValueError : # unpack 실패 or 형변환 실패
+                    message = (
+                        "입력값을 확인해주세요. 시간은 0부터 24까지의 숫자만 입력할 수 있습니다." "\n"
+                        "또한 띄어쓰기로 구분해서 두 개의 숫자만 입력하면 됩니다."
+                    )
+                    context.bot.send_message(chat_id=senderId, text=message)
+                    self.logger.warn("doNotDisturb Error : uid:{}, message:{}".format(senderId, senderMessage))
+                    return
+                
+                # 검증을 성공적으로 마침
+                database.setDoNotDisturb(senderId, start, end)
+                message = (
+                    "{}시부터 {}까지 키워드 알람을 받지 않도록 설정했습니다.".format(start, end)
+                )
+                context.bot.send_message(chat_id=senderId, text=message)
+                self.logger.info("doNotDisturb Success : uid:{}, start:{}, end:{}".format(senderId, start, end))

@@ -93,6 +93,7 @@ class TelegramBot :
         self.addCommandHandler(CMD['HOWTO'], baseFunction.howto)
         self.addCommandHandler(CMD['DELETE'], baseFunction.delete)
         self.addCommandHandler(CMD['STOP'], baseFunction.stop)
+        self.addCommandHandler(CMD['DONOTDISTURB'], baseFunction.doNotDisturb)
         
         self.addLeftChatMemberHandler(baseFunction.leftChatMember)
         self.addNewChatTitleHandler(baseFunction.newChatTitle)
