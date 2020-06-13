@@ -265,7 +265,7 @@ class BaseFunction :
         newGroupName = update.message.new_chat_title
 
         database.setGroupName(groupId, newGroupName)
-        self.logger.info("newChatTitle Success : gid:{}".format(groudId))
+        self.logger.info("newChatTitle Success : gid:{}".format(groupId))
         # 이름 갱신
 
 
