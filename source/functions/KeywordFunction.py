@@ -1,3 +1,4 @@
+from datetime import datetime
 from configparser import ConfigParser
 
 class KeywordFunction :
@@ -134,6 +135,7 @@ class KeywordFunction :
         # 키워드 알림은 그룹 채팅에서만 작동합니다
         if update.effective_chat.type == 'group' :
             database = self.database
+            currentHour = datetime.today().hour
 
             URL = self.URL
 
@@ -153,10 +155,20 @@ class KeywordFunction :
             # 그룹에 등록된 각 사용자의 키워드 정보를 확인하기
             for user in storedGroupUsers.values() :
                 
-                # 본인의 대화에는 키워드 감지를 하지 않음
+                # 1. 본인의 대화에는 키워드 감지를 하지 않음
                 if user == str(senderId) :
                     continue
 
+                # 2. 방해금지 시간대가 설정되었는지 확인함
+                start, end = database.getDoNotDisturb(user)
+                if start == "off" or start == None :
+                    pass
+                else :
+                    start, end = int(start), int(end)
+                    if currentHour >= start or currentHour < end :
+                        continue
+
+                # 3. 키워드를 확인함
                 keywords = database.getKeywordDict(user).values()
 
                 usedKeyword = self.isKeywordInMessage(keywords, senderMessage)
