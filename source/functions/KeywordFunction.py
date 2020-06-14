@@ -165,7 +165,7 @@ class KeywordFunction :
                     pass
                 else :
                     start, end = int(start), int(end)
-                    if currentHour >= start or currentHour < end :
+                    if self.isInHour(start, end, currentHour) :
                         continue
 
                 # 3. 키워드를 확인함
@@ -196,3 +196,33 @@ class KeywordFunction :
                 return keyword
         # 발견된 키워드 없으면 False 반환        
         return False
+
+    def isInHour(self, start, end, currentHour) :
+        
+        if start == end : # 같은 시간을 입력함
+            return False # 알람을 끈 것으로 간주함
+
+        if start == 0 :
+            if currentHour < end :
+                return True
+            else :
+                return False
+        
+        if end == 0 :
+            if currentHour >= start : 
+                return True
+            else :
+                return False
+            
+        if start < end :
+            if currentHour >= start and currentHour < end :
+                return True
+            else :
+                return False
+        else : # start > end
+            if currentHour >= start and currentHour <= 23 \
+                or \
+               currentHour >= 0 and currentHour < end :
+               return True
+            else :
+                return False

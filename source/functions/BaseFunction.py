@@ -284,7 +284,7 @@ class BaseFunction :
                     "방해금지 시간대 설정 명령어입니다." "\n"
                     "알람을 받지 \"않을\" 시간을 명령어와 함께 입력해주세요." "\n"
                     "예시) /" + CMD['DONOTDISTURB'] + " 23 8" "\n"
-                    "(23시부터 8시까지 알람이 울리지 않음)" "\n"
+                    "(23시부터 8시 정각까지 알람이 울리지 않음, 8시 1초부터 알람 울림)" "\n"
                     "시간 단위로만 설정이 가능하며, 방해금지 설정을 해제하고 싶은 경우 /" + CMD['DONOTDISTURB'] + " off 를 입력해주세요."
                 )
                 context.bot.send_message(chat_id=senderId, text=message)
@@ -296,7 +296,7 @@ class BaseFunction :
                     )
                 else :
                     message = (
-                        "현재 {}시부터 {}시까지의 알람을 받지 않도록 설정되어 있습니다.".format(start, end)
+                        "현재 {}시부터 {}시 정각까지의 알람을 받지 않도록 설정되어 있습니다.".format(start, end)
                     )
                 context.bot.send_message(chat_id=senderId, text=message)
                 self.logger.info("doNotDisturb Help : uid:{}".format(senderId))
