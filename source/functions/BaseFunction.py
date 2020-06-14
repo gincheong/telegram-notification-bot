@@ -284,14 +284,20 @@ class BaseFunction :
                     "방해금지 시간대 설정 명령어입니다." "\n"
                     "알람을 받지 \"않을\" 시간을 명령어와 함께 입력해주세요." "\n"
                     "예시) /" + CMD['DONOTDISTURB'] + " 23 8" "\n"
-                    "(23시부터 8시까지 알람이 울리지 않음)"
+                    "(23시부터 8시까지 알람이 울리지 않음)" "\n"
+                    "시간 단위로만 설정이 가능하며, 방해금지 설정을 해제하고 싶은 경우 /" + CMD['DONOTDISTURB'] + " off 를 입력해주세요."
                 )
                 context.bot.send_message(chat_id=senderId, text=message)
 
-                message = (
-                    "시간 단위로만 설정이 가능하며,"
-                    "방해금지 설정을 해제하고 싶은 경우 /" + CMD['DONOTDISTURB'] + " off 를 입력해주세요."
-                )
+                start, end = database.getDoNotDisturb(senderId)
+                if start == None or start == "off" :
+                    message = (
+                        "현재 방해금지 설정이 꺼져 있습니다."
+                    )
+                else :
+                    message = (
+                        "현재 {}시부터 {}시까지의 알람을 받지 않도록 설정되어 있습니다.".format(start, end)
+                    )
                 context.bot.send_message(chat_id=senderId, text=message)
                 self.logger.info("doNotDisturb Help : uid:{}".format(senderId))
 
@@ -314,14 +320,14 @@ class BaseFunction :
                     # 숫자를 입력했는지 검증
                     start, end = int(start), int(end)
 
-                    # 0 ~ 24 시간을 입력했는지 검증
-                    if start > 24 or start < 0 :
+                    # 0 ~ 23 시간을 입력했는지 검증
+                    if start > 23 or start < 0 :
                         raise ValueError
-                    if end > 24 or end < 0 :
+                    if end > 23 or end < 0 :
                         raise ValueError
                 except ValueError : # unpack 실패 or 형변환 실패
                     message = (
-                        "입력값을 확인해주세요. 시간은 0부터 24까지의 숫자만 입력할 수 있습니다." "\n"
+                        "입력값을 확인해주세요. 시간은 0부터 23까지의 숫자만 입력할 수 있습니다." "\n"
                         "또한 띄어쓰기로 구분해서 두 개의 숫자만 입력하면 됩니다."
                     )
                     context.bot.send_message(chat_id=senderId, text=message)
@@ -331,7 +337,7 @@ class BaseFunction :
                 # 검증을 성공적으로 마침
                 database.setDoNotDisturb(senderId, start, end)
                 message = (
-                    "{}시부터 {}까지 키워드 알람을 받지 않도록 설정했습니다.".format(start, end)
+                    "{}시부터 {}시 사이에 키워드 알람을 받지 않도록 설정했습니다.".format(start, end)
                 )
                 context.bot.send_message(chat_id=senderId, text=message)
                 self.logger.info("doNotDisturb Success : uid:{}, start:{}, end:{}".format(senderId, start, end))
