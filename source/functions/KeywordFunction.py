@@ -223,6 +223,6 @@ class KeywordFunction :
             if currentHour >= start and currentHour <= 23 \
                 or \
                currentHour >= 0 and currentHour < end :
-               return True
+                return True
             else :
                 return False
