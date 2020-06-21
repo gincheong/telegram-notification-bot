@@ -41,7 +41,7 @@ class TelegramBot :
 
     def addMessageHandler(self, callback) :
         dispatcher = self.dispatcher
-        handler = MessageHandler(Filters.text & (~Filters.command), callback)
+        handler = MessageHandler(Filters.text & (~Filters.command) & (~Filters.update.edited_message), callback)
         # command를 제외한 text에만 handler 적용
         dispatcher.add_handler(handler)
 
