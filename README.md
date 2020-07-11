@@ -27,3 +27,5 @@ Blog : [Tistory](https://desree.tistory.com/33)
 firebase_admin 2.16.0 (Apache2.0)  
 python 3.6.7  
 program is running on AWS
+
+[여기](https://github.com/gincheong/telegram-notification-bot/commit/b44776b2b467f0c939c89833c89f5d053e4e3cde) 까지 서버 업로드함
