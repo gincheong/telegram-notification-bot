@@ -45,6 +45,11 @@ class TelegramBot :
         # command를 제외한 text에만 handler 적용
         dispatcher.add_handler(handler)
 
+    def addMigrateHandler(self, callback) :
+        dispatcher = self.dispatcher
+        handler = MessageHandler(Filters.status_update.migrate, callback)
+        dispatcher.add_handler(handler)
+
     def addLeftChatMemberHandler(self, callback) :
         dispatcher = self.dispatcher
         handler = MessageHandler(Filters.status_update.left_chat_member, callback)
@@ -97,6 +102,9 @@ class TelegramBot :
         
         self.addLeftChatMemberHandler(baseFunction.leftChatMember)
         self.addNewChatTitleHandler(baseFunction.newChatTitle)
+
+        self.addMigrateHandler(baseFunction.detectMigrate)
+        self.addCommandHandler('debug', baseFunction.debug)
 
         # Error Handler
         self.dispatcher.add_error_handler(self.errorHandler)

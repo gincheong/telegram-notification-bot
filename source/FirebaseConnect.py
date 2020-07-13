@@ -27,6 +27,9 @@ class FirebaseConnect :
 
     def delete(self, url) :
         db.reference(url).delete()
+
+    def set(self, url, value) :
+        db.reference(url).set(value)
     
     
     ''' preset '''
@@ -40,6 +43,15 @@ class FirebaseConnect :
             return {}
         else :
             return keywords
+
+    def getGroupDataAll(self, groupId) :
+        URL = self.URL
+
+        data = self.get(URL['GROUP'] + '/' + str(groupId))
+        if data == None :
+            return {}
+        else :
+            return data
 
     # Todo#3    
     def getUserDictFromGroup(self, groupId) :
@@ -93,6 +105,11 @@ class FirebaseConnect :
 
         self.push(URL['USER'] + '/' + str(userId) + URL['KEYWORD'], keyword)
 
+    def addNewGroup(self, groupId, data) :
+        URL = self.URL
+
+        self.set(URL['GROUP'] + '/' + str(groupId), data)
+
     def setGroupName(self, groupId, groupName) :
         URL = self.URL
         KEY = self.KEY
@@ -132,3 +149,35 @@ class FirebaseConnect :
         URL = self.URL
 
         self.delete(URL['USER'] + '/' + str(userId) + URL['KEYWORD'] + '/' + keyword_key)
+
+    def deleteGroup(self, groupId) :
+        URL = self.URL
+
+        self.delete(URL['GROUP'] + '/' + str(groupId))
+
+
+    ''' PRESET '''
+    def migrateGroupData(self, oldGroupId, newGroupId) :
+        groupData = self.getGroupDataAll(oldGroupId)
+        # 데이터 가져오기
+        
+        self.addNewGroup(newGroupId, groupData)
+        # 새 그룹 아이디에 데이터 복사
+
+        self.deleteGroup(oldGroupId)
+        # 쓸모없어진 이전 데이터 삭제
+
+    def migrateUserData(self, oldGroupId, newGroupId) :
+        usersInGroup = self.getUserDictFromGroup(newGroupId)
+        # 위의 migrateGroupData를 먼저 실행할 거니까, 여기서는 newGroupId를 기준으로 가져오는 것이 맞다.
+
+        for key, userId in usersInGroup.items() :
+            # 그룹에 등록된 사용자들에게서 등록된 그룹목록을 가져옴 아따 복잡하다 ㅋㅋ 왜 이렇게 만들었니?
+            groupsInUser = self.getGroupDictFromUser(userId)
+
+            for groupId in groupsInUser.keys() :
+                if groupId == str(oldGroupId) :
+                    self.deleteGroupFromUser(oldGroupId, userId)
+                    # 이전 그룹 아이디를 삭제하고
+                    self.addGroupToUser(newGroupId, userId)
+                    # 새 그룹 아이디를 추가
