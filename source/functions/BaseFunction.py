@@ -22,7 +22,6 @@ class BaseFunction :
     
     def start(self, update, context) :
         Actions.sendAction(update, context, ChatAction.TYPING)
-        print(update.message)
 
         # Private Chat
         if update.effective_chat.type == "private" :
@@ -368,9 +367,6 @@ class BaseFunction :
 
         if update.effective_chat.type == 'group' :
             database = self.database
-
-            print(update.message)
-
 
             oldGroupId = update.message.chat_id
             newGroupId = update.message.migrate_to_chat_id
