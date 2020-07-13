@@ -104,7 +104,6 @@ class TelegramBot :
         self.addNewChatTitleHandler(baseFunction.newChatTitle)
 
         self.addMigrateHandler(baseFunction.detectMigrate)
-        self.addCommandHandler('debug', baseFunction.debug)
 
         # Error Handler
         self.dispatcher.add_error_handler(self.errorHandler)
