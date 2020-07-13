@@ -1,5 +1,8 @@
 from configparser import ConfigParser
 
+from telegram import ChatAction
+from .actions import Actions
+
 class GroupFunction :
     def __init__(self, config, database, logger) :
         self.database = database
@@ -11,6 +14,8 @@ class GroupFunction :
 
     def glist(self, update, context) :
         if update.effective_chat.type == "private" :
+            Actions.sendAction(update, context, ChatAction.TYPING)
+
             database = self.database
 
             senderId = update.effective_chat.id

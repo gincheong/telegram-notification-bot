@@ -1,5 +1,8 @@
 from configparser import ConfigParser
 
+from telegram import ChatAction
+from .actions import Actions
+
 class BaseFunction :
     def __init__(self, config, database, logger) :
         self.database = database
@@ -16,8 +19,11 @@ class BaseFunction :
             commandInput = text[len(command) + 2 : ]
             commandInput = commandInput.strip().lower() # 좌우 공백 제거, 소문자 변환
             return commandInput
-
+    
     def start(self, update, context) :
+        Actions.sendAction(update, context, ChatAction.TYPING)
+        print(update.message)
+
         # Private Chat
         if update.effective_chat.type == "private" :
             senderId = update.effective_chat.id
@@ -46,7 +52,7 @@ class BaseFunction :
             self.logger.info("start Help : uid:{}".format(senderId))
 
         # Group Chat
-        elif update.effective_chat.type == "group" :
+        elif update.effective_chat.type in ["group", "supergroup"] :
             database = self.database
             
             senderId = update.message.from_user.id
@@ -92,6 +98,8 @@ class BaseFunction :
             
 
     def delete(self, update, context) :
+        Actions.sendAction(update, context, ChatAction.TYPING)
+
         if update.effective_chat.type == "private" :
             senderId = update.effective_chat.id
             message = (
@@ -100,7 +108,7 @@ class BaseFunction :
             self.logger.info("delete Help : uid:{}".format(senderId))
             context.bot.send_message(chat_id=senderId, text=message)
 
-        elif update.effective_chat.type == "group" :
+        elif update.effective_chat.type in ["group", "supergroup"] :
             database = self.database
         
             CMD = self.CMD
@@ -142,6 +150,8 @@ class BaseFunction :
 
     def stop(self, update, context) :
         if update.effective_chat.type == "private" :
+            Actions.sendAction(update, context, ChatAction.TYPING)
+
             database = self.database
         
             CMD = self.CMD
@@ -192,6 +202,8 @@ class BaseFunction :
     def help_(self, update, context) :
         if update.effective_chat.type == "private" :
             # only available in private chat
+            Actions.sendAction(update, context, ChatAction.TYPING)
+            
             CMD = self.CMD
             senderId = update.effective_chat.id
             
@@ -221,6 +233,8 @@ class BaseFunction :
     def howto(self, update, context) :
         if update.effective_chat.type == "private" :
             # only available in private chat
+            Actions.sendAction(update, context, ChatAction.TYPING)
+
             senderId = update.effective_chat.id
             message = (
                 "1. 키워드 알림을 활성화할 그룹 채팅에 봇을 초대합니다." "\n"
@@ -271,6 +285,8 @@ class BaseFunction :
 
     def doNotDisturb(self, update, context) :
         if update.effective_chat.type == "private" :
+            Actions.sendAction(update, context, ChatAction.TYPING)
+
             database = self.database
             CMD = self.CMD
             senderId = update.effective_chat.id
@@ -341,3 +357,29 @@ class BaseFunction :
                 )
                 context.bot.send_message(chat_id=senderId, text=message)
                 self.logger.info("doNotDisturb Success : uid:{}, start:{}, end:{}".format(senderId, start, end))
+
+    
+    def detectMigrate(self, update, context) :
+        # 해당 메소드는 chat type이 group에서 supergroup으로 바뀔 때 총 2회 실행됨
+        # 변경 이전인 group 기준으로, "현재 ID"와 "앞으로 사용할 ID"가 기록된 message가 전달되고
+        # 변경 이후 supergroup 기준으로, 변경 완료된 "현재 ID"와, 변경되기 "이전에 사용되던 ID"가 기록된 message가 전달된다.
+
+        # 총 2회 중에, 먼저 발생하는 group기준 메세지로 데이터 처리를 할 것임
+
+        if update.effective_chat.type == 'group' :
+            database = self.database
+
+            print(update.message)
+
+
+            oldGroupId = update.message.chat_id
+            newGroupId = update.message.migrate_to_chat_id
+
+            # 1. GROUP단 데이터 이동
+            database.migrateGroupData(oldGroupId, newGroupId)
+
+            # 2. USER단 데이터 변경
+            database.migrateUserData(oldGroupId, newGroupId)
+
+            # migrateGroupData -> migrateUserData 순서대로 작동시킬것
+            # 순서대로 작동해야해!!!!

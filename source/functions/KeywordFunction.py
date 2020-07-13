@@ -1,6 +1,9 @@
 from datetime import datetime
 from configparser import ConfigParser
 
+from telegram import ChatAction
+from .actions import Actions
+
 class KeywordFunction :
     def __init__(self, config, database, logger) :
         self.database = database
@@ -30,6 +33,8 @@ class KeywordFunction :
 
     def kadd(self, update, context) :
         if update.effective_chat.type == "private" :
+            Actions.sendAction(update, context, ChatAction.TYPING)
+
             database = self.database
 
             CMD = self.CMD
@@ -65,9 +70,10 @@ class KeywordFunction :
             
             context.bot.send_message(chat_id=senderId, text=message)
 
-            
     def klist(self, update, context) :
         if update.effective_chat.type == "private" :
+            Actions.sendAction(update, context, ChatAction.TYPING)
+
             database = self.database
             
             senderId = update.effective_chat.id
@@ -89,6 +95,8 @@ class KeywordFunction :
 
     def kdel(self, update, context) :
         if update.effective_chat.type == "private" :
+            Actions.sendAction(update, context, ChatAction.TYPING)
+            
             database = self.database
 
             CMD = self.CMD
@@ -133,7 +141,7 @@ class KeywordFunction :
     # 키워드 대조하는 함수, MessageHandler에 추가되어 매 채팅마다 실행됨
     def isKeywordUsed(self, update, context) :
         # 키워드 알림은 그룹 채팅에서만 작동합니다
-        if update.effective_chat.type == 'group' :
+        if update.effective_chat.type in ["group", "supergroup"] :
             database = self.database
             currentHour = datetime.today().hour
 
