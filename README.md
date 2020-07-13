@@ -28,4 +28,4 @@ Blog : [Tistory](https://desree.tistory.com/33)
 python 3.6.7  
 program is running on AWS
 
-[여기](https://github.com/gincheong/telegram-notification-bot/commit/b44776b2b467f0c939c89833c89f5d053e4e3cde) 까지 서버 업로드함
+[여기](https://github.com/gincheong/telegram-notification-bot/commit/d8df835ad364e8738cd0767a8f1fa59397acbb47) 까지 서버 업로드함
