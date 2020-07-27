@@ -1,7 +1,7 @@
 from datetime import datetime
 from configparser import ConfigParser
 
-from telegram import ChatAction
+from telegram import ChatAction, error
 from .actions import Actions
 
 class KeywordFunction :
@@ -190,8 +190,12 @@ class KeywordFunction :
                     )
 
                     # 알림 메세지 사용자에게 전송
-                    context.bot.send_message(chat_id=user, text=message, disable_web_page_preview=True)
-                    self.logger.info("Notifications : uid:{}, gid:{}, mid:{}".format(user, groupId, messageId))
+                    try :
+                        context.bot.send_message(chat_id=user, text=message, disable_web_page_preview=True)
+                        self.logger.info("Notifications : uid:{}, gid:{}, mid:{}".format(user, groupId, messageId))
+                        
+                    except error.Unauthorized :
+                        self.logger.error("telegram.error.Unauthorized: uid:{}".format(user))
 
             
     def isKeywordInMessage(self, keywords, message) :

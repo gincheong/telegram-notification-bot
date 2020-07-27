@@ -67,6 +67,7 @@ class TelegramBot :
             raise context.error
         except Exception :
             self.logger.error(update.effective_chat) # 어차피 gid, mid 등으로 메세지 트래킹은 할 수 없긴 함
+            self.logger.error(update.message.from_user)
 
             errorLog = traceback.format_exc()
             self.logger.error(errorLog)
