@@ -23,9 +23,9 @@ Telegram : [@gincheong](https://t.me/gincheong)
 EMAIL : gincheong2@gmail.com  
 Blog : [Tistory](https://desree.tistory.com/33)
 
-[python-telegram-bot 12.7](https://github.com/python-telegram-bot/python-telegram-bot) (LGPLv3.0)  
+[python-telegram-bot 12.8](https://github.com/python-telegram-bot/python-telegram-bot) (LGPLv3.0)  
 [firebase_admin 4.3.0](https://github.com/firebase/firebase-admin-python) (Apache2.0)  
-python 3.6.7  
+python 3.6.9  
 program is running on AWS
 
 [여기](https://github.com/gincheong/telegram-notification-bot/commit/f4c1f7134ada2dcbb5cb299d2891396aa4a3a706) 까지 서버 업로드함
