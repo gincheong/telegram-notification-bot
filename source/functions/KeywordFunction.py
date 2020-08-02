@@ -1,3 +1,5 @@
+import sys
+
 from datetime import datetime
 from configparser import ConfigParser
 
@@ -195,7 +197,9 @@ class KeywordFunction :
                         self.logger.info("Notifications : uid:{}, gid:{}, mid:{}".format(user, groupId, messageId))
                         
                     except error.Unauthorized :
-                        self.logger.error("telegram.error.Unauthorized: uid:{}".format(user))
+                        self.logger.error("error occured: {}".format(sys._getframe().f_code.co_name))
+                        self.logger.error("telegram.error.Unauthorized: uid:{}, {}".format(user, error.Unauthorized.message))
+                    
 
             
     def isKeywordInMessage(self, keywords, message) :
