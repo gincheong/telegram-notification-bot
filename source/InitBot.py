@@ -1,6 +1,6 @@
 import traceback
 import telegram
-from telegram import Update
+from telegram import Update, error
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext import CallbackContext
 
@@ -73,6 +73,13 @@ class TelegramBot :
             self.logger.error(errorLog)
             context.bot.send_message(chat_id=adminId, text=errorLog, disable_notification=True)
             # 에러 발생하면 나한테 전송함
+        except error.BadRequest :
+            self.logger.error(update.effective_chat)
+            self.logger.error(update.message.from_user)
+            
+            errorLog = traceback.format_exc()
+            self.logger.error(errorLog)
+            context.bot.send_message(chat_id=adminId, text="BadRequest 에러 발생함", disable_notification=True)
 
     def initHandler(self) :
         logger = self.logger

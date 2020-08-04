@@ -7,7 +7,7 @@ from telegram import ChatAction, error
 from .actions import Actions
 
 class KeywordFunction :
-    def __init__(self, config, database, logger) :
+    def __init__(self, config, database, logger) : 
         self.database = database
         self.logger = logger
         
@@ -198,7 +198,7 @@ class KeywordFunction :
                         
                     except error.Unauthorized :
                         self.logger.error("error occured: {}".format(sys._getframe().f_code.co_name))
-                        self.logger.error("telegram.error.Unauthorized: uid:{}, {}".format(user, error.Unauthorized.message))
+                        self.logger.error("telegram.error.Unauthorized: uid:{}, {}".format(user, context.error))
                     
 
             
