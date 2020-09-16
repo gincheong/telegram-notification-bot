@@ -170,13 +170,16 @@ class KeywordFunction :
                     continue
 
                 # 2. 방해금지 시간대가 설정되었는지 확인함
+                isDNDSet = False
                 start, end = database.getDoNotDisturb(user)
                 if start == "off" or start == None :
                     pass
                 else :
                     start, end = int(start), int(end)
                     if self.isInHour(start, end, currentHour) :
-                        continue
+                        isDNDSet = True
+                        # 방해금지 설정이 되어있으면, 키워드 알림 전송 시
+                        # disable_notification=True 로 보냄
 
                 # 3. 키워드를 확인함
                 keywords = database.getKeywordDict(user).values()
@@ -185,15 +188,25 @@ class KeywordFunction :
                 if usedKeyword == False :
                     pass
                 else :
-                    message = (
-                        "{} 님이 호출했습니다.".format(senderName) + "\n"
-                        "그룹 이름 : {}".format(groupName) + "\n"
-                        "메세지 내용 : {}".format(senderMessage)
-                    )
+                    if isDNDSet :
+                        message = (
+                            "[방해금지 설정 중]" + "\n"
+                            "{} 님이 호출했습니다.".format(senderName) + "\n"
+                            "그룹 이름 : {}".format(groupName) + "\n"
+                            "메세지 내용 : {}".format(senderMessage)
+                        )
+                    else :
+                        message = (
+                            "{} 님이 호출했습니다.".format(senderName) + "\n"
+                            "그룹 이름 : {}".format(groupName) + "\n"
+                            "메세지 내용 : {}".format(senderMessage)
+                        )
 
                     # 알림 메세지 사용자에게 전송
                     try :
-                        context.bot.send_message(chat_id=user, text=message, disable_web_page_preview=True)
+                        context.bot.send_message(chat_id=user, text=message,
+                                                disable_web_page_preview=True,
+                                                disable_notification=isDNDSet)
                         self.logger.info("Notifications : uid:{}, gid:{}, mid:{}".format(user, groupId, messageId))
                         
                     except error.Unauthorized :
