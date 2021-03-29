@@ -3,8 +3,7 @@ import sys
 from datetime import datetime
 from configparser import ConfigParser
 
-from telegram import ChatAction, error
-from .actions import Actions
+from telegram import error
 
 class KeywordFunction :
     def __init__(self, config, database, logger) : 
@@ -35,8 +34,6 @@ class KeywordFunction :
 
     def kadd(self, update, context) :
         if update.effective_chat.type == "private" :
-            Actions.sendAction(update, context, ChatAction.TYPING)
-
             database = self.database
 
             CMD = self.CMD
@@ -74,8 +71,6 @@ class KeywordFunction :
 
     def klist(self, update, context) :
         if update.effective_chat.type == "private" :
-            Actions.sendAction(update, context, ChatAction.TYPING)
-
             database = self.database
             
             senderId = update.effective_chat.id
@@ -97,8 +92,6 @@ class KeywordFunction :
 
     def kdel(self, update, context) :
         if update.effective_chat.type == "private" :
-            Actions.sendAction(update, context, ChatAction.TYPING)
-            
             database = self.database
 
             CMD = self.CMD

@@ -1,8 +1,5 @@
 from configparser import ConfigParser
 
-from telegram import ChatAction
-from .actions import Actions
-
 class BaseFunction :
     def __init__(self, config, database, logger) :
         self.database = database
@@ -21,7 +18,6 @@ class BaseFunction :
             return commandInput
     
     def start(self, update, context) :
-        Actions.sendAction(update, context, ChatAction.TYPING)
 
         # Private Chat
         if update.effective_chat.type == "private" :
@@ -97,8 +93,6 @@ class BaseFunction :
             
 
     def delete(self, update, context) :
-        Actions.sendAction(update, context, ChatAction.TYPING)
-
         if update.effective_chat.type == "private" :
             senderId = update.effective_chat.id
             message = (
@@ -149,8 +143,6 @@ class BaseFunction :
 
     def stop(self, update, context) :
         if update.effective_chat.type == "private" :
-            Actions.sendAction(update, context, ChatAction.TYPING)
-
             database = self.database
         
             CMD = self.CMD
@@ -201,8 +193,6 @@ class BaseFunction :
     def help_(self, update, context) :
         if update.effective_chat.type == "private" :
             # only available in private chat
-            Actions.sendAction(update, context, ChatAction.TYPING)
-            
             CMD = self.CMD
             senderId = update.effective_chat.id
             
@@ -232,8 +222,6 @@ class BaseFunction :
     def howto(self, update, context) :
         if update.effective_chat.type == "private" :
             # only available in private chat
-            Actions.sendAction(update, context, ChatAction.TYPING)
-
             senderId = update.effective_chat.id
             message = (
                 "1. 키워드 알림을 활성화할 그룹 채팅에 봇을 초대합니다." "\n"
@@ -284,8 +272,6 @@ class BaseFunction :
 
     def doNotDisturb(self, update, context) :
         if update.effective_chat.type == "private" :
-            Actions.sendAction(update, context, ChatAction.TYPING)
-
             database = self.database
             CMD = self.CMD
             senderId = update.effective_chat.id

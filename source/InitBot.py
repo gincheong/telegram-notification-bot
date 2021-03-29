@@ -65,6 +65,13 @@ class TelegramBot :
 
         try :
             raise context.error
+        except error.BadRequest :
+            self.logger.error(update.effective_chat)
+            self.logger.error(update.message.from_user)
+            
+            errorLog = traceback.format_exc()
+            self.logger.error(errorLog)
+            # context.bot.send_message(chat_id=adminId, text="BadRequest 에러 발생함", disable_notification=True)
         except Exception :
             try :
                 self.logger.error(update.effective_chat) # 어차피 gid, mid 등으로 메세지 트래킹은 할 수 없긴 함
@@ -74,15 +81,7 @@ class TelegramBot :
 
             errorLog = traceback.format_exc()
             self.logger.error(errorLog)
-            context.bot.send_message(chat_id=adminId, text=errorLog, disable_notification=True)
-            # 에러 발생하면 나한테 전송함
-        except error.BadRequest :
-            self.logger.error(update.effective_chat)
-            self.logger.error(update.message.from_user)
-            
-            errorLog = traceback.format_exc()
-            self.logger.error(errorLog)
-            context.bot.send_message(chat_id=adminId, text="BadRequest 에러 발생함", disable_notification=True)
+            # context.bot.send_message(chat_id=adminId, text=errorLog, disable_notification=True)
 
     def initHandler(self) :
         logger = self.logger
