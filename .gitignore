@@ -4,3 +4,4 @@ Firebase
 *.md
 *.log
 source/log/
+venv/
