@@ -4,7 +4,8 @@
   "description": "Keyword Notification Service for Telegram Bot API",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.ts",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
