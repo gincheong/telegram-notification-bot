@@ -1,1 +1,13 @@
+# directory
 node_modules
+
+# file
+.env
+dist
+
+# files
+*.log
+
+# OS metadata
+.DS_Store
+Thumbs.db
