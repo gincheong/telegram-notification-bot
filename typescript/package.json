@@ -1,0 +1,26 @@
+{
+  "name": "telegram-notification-bot",
+  "version": "1.0.0",
+  "description": "Keyword Notification Service for Telegram Bot API",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gincheong/telegram-notification-bot.git"
+  },
+  "keywords": [
+    "telegram",
+    "telegram notification"
+  ],
+  "author": "gincheong2@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gincheong/telegram-notification-bot/issues"
+  },
+  "homepage": "https://github.com/gincheong/telegram-notification-bot#readme",
+  "dependencies": {
+    "firebase": "^9.19.1"
+  }
+}
