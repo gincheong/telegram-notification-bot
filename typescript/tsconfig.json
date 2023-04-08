@@ -2,13 +2,10 @@
   "compilerOptions": {
     "module": "CommonJS",
     "target": "es5",
-    "baseUrl": "./",
+    "baseUrl": ".",
     "strict": true,
     "outDir": "./dist",
     "sourceMap": true,
-    "paths": {
-      "@TKNB/*": ["./src/*"]
-    },
     "allowJs": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
