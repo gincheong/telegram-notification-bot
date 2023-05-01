@@ -1,8 +1,7 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
+import { credential, database } from 'firebase-admin';
+import { initializeApp } from 'firebase-admin/app';
 
-import { EnvironmentVariables } from 'src/config';
+import { EnvironmentVariables } from '../config';
 
 const firebaseConfig = {
   apiKey: EnvironmentVariables.FIREBASE_API_KEY,
@@ -15,6 +14,13 @@ const firebaseConfig = {
   measurementId: EnvironmentVariables.FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const database = getDatabase(app);
+const serviceAccount = require(EnvironmentVariables.FIREBASE_SERVICE_ACCOUNT_KEY_PATH);
+
+initializeApp({
+  credential: credential.cert(serviceAccount),
+  databaseURL: firebaseConfig.databaseURL,
+});
+
+const db = database();
+
+export { db };

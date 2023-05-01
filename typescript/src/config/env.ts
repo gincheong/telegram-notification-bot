@@ -11,4 +11,5 @@ export const EnvironmentVariables = {
   FIREBASE_MESSAGING_SENDER_ID: process.env.FIREBASE_MESSAGING_SENDER_ID as string,
   FIREBASE_APP_ID: process.env.FIREBASE_APP_ID as string,
   FIREBASE_MEASUREMENT_ID: process.env.FIREBASE_MEASUREMENT_ID as string,
+  FIREBASE_SERVICE_ACCOUNT_KEY_PATH: process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH as string,
 };
