@@ -1,8 +1,26 @@
+import { db } from '../db';
+import { Logger } from '../utils';
+
 class KeywordModelBuilder {
   constructor() {}
 
-  getKeywords(id: number) {
-    return ['술', '롤', '인규'];
+  async getKeywords(id: number) {
+    const ref = db.ref(`user/${id}/keyword`);
+
+    Logger.debug(`Try fetching keywords of id: ${id}`);
+
+    try {
+      const snapshot = await ref.get();
+      const keywords = Object.values(snapshot.val());
+
+      return keywords as string[];
+    } catch (err) {
+      const error = err as Error;
+
+      Logger.error(`Exception while fetching data(/getKeywords): ${error.message}`);
+
+      return [];
+    }
   }
 }
 
