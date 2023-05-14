@@ -11,7 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "@types"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
