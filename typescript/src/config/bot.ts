@@ -1,4 +1,5 @@
 export const BotCommands = {
-  AddKeyword: '/kadd',
-  GetKeywords: '/klist',
+  GetKeywords: /^\/klist$/,
+  AddKeyword: /^\/kadd/,
+  DeleteKeyword: /^\/kdel/,
 };

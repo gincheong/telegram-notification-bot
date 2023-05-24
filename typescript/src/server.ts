@@ -10,7 +10,9 @@ Logger.debug('Launching Bot ...');
 Bot.launch();
 Logger.debug('Bot has Launched');
 
-Bot.hears(BotCommands.GetKeywords, async (context) => await KeywordController.getKeywords(context));
+Bot.hears(BotCommands.GetKeywords, KeywordController.getKeywords);
+Bot.hears(BotCommands.AddKeyword, KeywordController.addKeyword);
+Bot.hears(BotCommands.DeleteKeyword, KeywordController.deleteKeyword);
 
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));

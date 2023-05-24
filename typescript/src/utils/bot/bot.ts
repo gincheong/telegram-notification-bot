@@ -1,23 +1,22 @@
-import { Context } from 'telegraf';
-import { Update } from 'telegraf/typings/core/types/typegram';
-
+import { TelegrafContext } from '../../types';
 import { LanguageCode } from '../../strings';
+
 import { Logger } from '../log';
 
-export const getContextData = (context: Context<Update>) => {
+export const getContextData = (context: TelegrafContext) => {
   const languageCode = getLanguageCode(context);
   const id = context.from?.id;
+  const args = parseArgs(context);
 
   if (!id) {
     const logMessage = `[getContextData] 'from' property not in context. context: ${context}`;
     Logger.error(logMessage);
-    throw new Error(logMessage);
   }
 
-  return { id, languageCode };
+  return { id, languageCode, args };
 };
 
-export const getLanguageCode = (context: Context<Update>) => {
+export const getLanguageCode = (context: TelegrafContext) => {
   const languageCode = context.from?.language_code;
 
   if (!languageCode) {
@@ -25,4 +24,10 @@ export const getLanguageCode = (context: Context<Update>) => {
   }
 
   return languageCode as LanguageCode;
+};
+
+export const parseArgs = (context: TelegrafContext) => {
+  const split = context.message.text.split(' ');
+
+  return split.slice(1);
 };
