@@ -1,4 +1,4 @@
-import { BotCommands } from '../../config';
+import { BotCommands } from '@tnb/config';
 
 export const Common = {
   START_PRIVATE: [

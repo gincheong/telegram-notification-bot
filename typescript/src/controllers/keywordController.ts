@@ -1,9 +1,8 @@
-import { TelegrafContext } from '../types';
-
-import { KeywordModel } from '../models';
-import { getContextData } from '../utils';
-import { NotFoundKeywordError } from '../error';
-import { Strings } from '../strings';
+import { TelegrafContext } from '@tnb/types';
+import { KeywordModel } from '@tnb/models';
+import { getContextData } from '@tnb/utils';
+import { NotFoundKeywordError } from '@tnb/error';
+import { Strings } from '@tnb/strings';
 
 class KeywordControllerBuilder {
   constructor() {}

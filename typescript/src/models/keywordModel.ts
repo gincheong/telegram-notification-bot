@@ -1,6 +1,6 @@
-import { db, getKeywordRef } from '../db';
-import { Logger } from '../utils';
-import { NotFoundKeywordError } from '../error';
+import { db, getKeywordRef } from '@tnb/db';
+import { Logger } from '@tnb/utils';
+import { NotFoundKeywordError } from '@tnb/error';
 
 class KeywordModelBuilder {
   constructor() {}

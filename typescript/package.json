@@ -4,7 +4,7 @@
   "description": "Keyword Notification Service for Telegram Bot API",
   "main": "./src/server.ts",
   "scripts": {
-    "start": "nodemon --watch src --delay 0.5 --exec ts-node src/server.ts",
+    "start": "nodemon --watch src --delay 0.5 --exec ts-node -r tsconfig-paths/register src/server.ts",
     "build": "tsc"
   },
   "repository": {
@@ -29,6 +29,7 @@
     "telegraf": "^4.12.2"
   },
   "devDependencies": {
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.0.4"
   }
 }

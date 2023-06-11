@@ -1,7 +1,7 @@
 import { credential, database } from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 
-import { EnvironmentVariables } from '../config';
+import { EnvironmentVariables } from '@tnb/config';
 
 const firebaseConfig = {
   apiKey: EnvironmentVariables.FIREBASE_API_KEY,

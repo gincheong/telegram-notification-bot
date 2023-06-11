@@ -1,5 +1,5 @@
-import { TelegrafContext } from '../../types';
-import { LanguageCode } from '../../strings';
+import { TelegrafContext } from '@tnb/types';
+import { LanguageCode } from '@tnb/strings';
 
 import { Logger } from '../log';
 

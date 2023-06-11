@@ -1,5 +1,5 @@
-import { Logger } from '../utils';
-import { db, getUserGroupRef } from '../db';
+import { Logger } from '@tnb/utils';
+import { db, getUserGroupRef } from '@tnb/db';
 
 class CommonModelBuilder {
   constructor() {}
