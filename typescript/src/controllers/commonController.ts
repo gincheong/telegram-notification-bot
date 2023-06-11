@@ -1,6 +1,6 @@
-import { getContextData } from '../utils';
-import { ChatType, TelegrafContext } from '../types';
-import { Strings } from '../strings';
+import { getContextData } from '@tnb/utils';
+import { ChatType, TelegrafContext } from '@tnb/types';
+import { Strings } from '@tnb/strings';
 
 class HelpControllerBuilder {
   constructor() {}
