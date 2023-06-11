@@ -2,7 +2,7 @@ import { getContextData } from '@tnb/utils';
 import { ChatType, TelegrafContext } from '@tnb/types';
 import { Strings } from '@tnb/strings';
 
-class HelpControllerBuilder {
+class CommonControllerBuilder {
   constructor() {}
 
   start(context: TelegrafContext) {
@@ -33,4 +33,4 @@ class HelpControllerBuilder {
   }
 }
 
-export const HelpController = new HelpControllerBuilder();
+export const CommonController = new CommonControllerBuilder();
