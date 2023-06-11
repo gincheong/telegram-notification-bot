@@ -1,16 +1,12 @@
-import { db } from '../db';
+import { db, getKeywordRef } from '../db';
 import { Logger } from '../utils';
 import { NotFoundKeywordError } from '../error';
 
 class KeywordModelBuilder {
   constructor() {}
 
-  private getKeywordRef(id: number, keywordKey: string = '') {
-    return db.ref(`user/${id}/keyword/${keywordKey}`);
-  }
-
   async getKeywords(id: number) {
-    const ref = this.getKeywordRef(id);
+    const ref = getKeywordRef(db, id);
 
     try {
       Logger.debug(`Try fetching keywords: ${id}`);
@@ -28,7 +24,7 @@ class KeywordModelBuilder {
   }
 
   async addKeyword(id: number, keyword: string) {
-    const ref = this.getKeywordRef(id);
+    const ref = getKeywordRef(db, id);
 
     try {
       Logger.debug(`Try inserting keyword: ${id}/${keyword}`);
@@ -44,7 +40,7 @@ class KeywordModelBuilder {
   }
 
   async deleteKeyword(id: number, keyword: string) {
-    const ref = this.getKeywordRef(id);
+    const ref = getKeywordRef(db, id);
 
     try {
       Logger.debug(`Try deleting keyword: ${id}/${keyword}`);
@@ -58,7 +54,7 @@ class KeywordModelBuilder {
 
       for (const [key, val] of Object.entries(keywords)) {
         if (val === keyword) {
-          const deleteRef = this.getKeywordRef(id, key);
+          const deleteRef = getKeywordRef(db, id, key);
 
           await deleteRef.remove();
           return true;

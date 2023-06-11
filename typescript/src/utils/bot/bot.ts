@@ -6,6 +6,7 @@ import { Logger } from '../log';
 export const getContextData = (context: TelegrafContext) => {
   const languageCode = getLanguageCode(context);
   const id = context.from?.id;
+  const type = context.chat.type;
   const args = parseArgs(context);
 
   if (!id) {
@@ -13,7 +14,7 @@ export const getContextData = (context: TelegrafContext) => {
     Logger.error(logMessage);
   }
 
-  return { id, languageCode, args };
+  return { id, languageCode, args, type };
 };
 
 export const getLanguageCode = (context: TelegrafContext) => {

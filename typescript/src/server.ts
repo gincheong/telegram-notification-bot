@@ -1,6 +1,6 @@
 import { Telegraf } from 'telegraf';
 
-import { KeywordController } from './controllers';
+import { HelpController, KeywordController } from './controllers';
 import { EnvironmentVariables, BotCommands } from './config';
 import { Logger } from './utils';
 
@@ -10,9 +10,12 @@ Logger.debug('Launching Bot ...');
 Bot.launch();
 Logger.debug('Bot has Launched');
 
-Bot.hears(BotCommands.GetKeywords, KeywordController.getKeywords);
-Bot.hears(BotCommands.AddKeyword, KeywordController.addKeyword);
-Bot.hears(BotCommands.DeleteKeyword, KeywordController.deleteKeyword);
+Bot.hears(BotCommands.GET_KEYWORDS, KeywordController.getKeywords);
+Bot.hears(BotCommands.ADD_KEYWORD, KeywordController.addKeyword);
+Bot.hears(BotCommands.DELETE_KEYWORD, KeywordController.deleteKeyword);
+
+Bot.hears(BotCommands.START, HelpController.start);
+Bot.hears(BotCommands.INFO, HelpController.info);
 
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));

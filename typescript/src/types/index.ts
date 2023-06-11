@@ -1,3 +1,5 @@
+export * from './chat';
+
 import { Context, NarrowedContext } from 'telegraf';
 import { Update, Message } from 'telegraf/src/core/types/typegram';
 
