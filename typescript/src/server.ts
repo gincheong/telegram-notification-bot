@@ -1,6 +1,6 @@
 import { Telegraf } from 'telegraf';
 
-import { CommonController, KeywordController } from './controllers';
+import { CommonController, GroupController, KeywordController } from './controllers';
 import { EnvironmentVariables, BotCommands } from './config';
 import { Logger } from './utils';
 
@@ -16,6 +16,8 @@ Bot.hears(BotCommands.DELETE_KEYWORD, KeywordController.deleteKeyword);
 
 Bot.hears(BotCommands.START, CommonController.start);
 Bot.hears(BotCommands.INFO, CommonController.info);
+
+Bot.hears(BotCommands.START, GroupController.start);
 
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));

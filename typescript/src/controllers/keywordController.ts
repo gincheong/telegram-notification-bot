@@ -1,4 +1,4 @@
-import { TelegrafContext } from '@tnb/types';
+import { ChatType, ChatTypes, TelegrafContext } from '@tnb/types';
 import { KeywordModel } from '@tnb/models';
 import { getContextData } from '@tnb/utils';
 import { NotFoundKeywordError } from '@tnb/error';
@@ -8,7 +8,11 @@ class KeywordControllerBuilder {
   constructor() {}
 
   async getKeywords(context: TelegrafContext) {
-    const { id, languageCode } = getContextData(context);
+    const { id, chatType, languageCode } = getContextData(context);
+
+    if (chatType === ChatTypes.PRIVATE) {
+      return;
+    }
 
     const keywords = await KeywordModel.getKeywords(id);
     if (keywords.length === 0) {
@@ -19,7 +23,11 @@ class KeywordControllerBuilder {
   }
 
   async addKeyword(context: TelegrafContext) {
-    const { id, languageCode, args } = getContextData(context);
+    const { id, chatType, languageCode, args } = getContextData(context);
+
+    if (chatType === ChatTypes.PRIVATE) {
+      return;
+    }
 
     if (args.length === 0) {
       context.reply(Strings[languageCode].ADD_KEYWORD_NO_ARGS);
@@ -37,7 +45,11 @@ class KeywordControllerBuilder {
   }
 
   async deleteKeyword(context: TelegrafContext) {
-    const { id, languageCode, args } = getContextData(context);
+    const { id, chatType, languageCode, args } = getContextData(context);
+
+    if (chatType === ChatTypes.PRIVATE) {
+      return;
+    }
 
     if (args.length === 0) {
       context.reply(Strings[languageCode].DELETE_KEYWORD_NO_ARGS);
