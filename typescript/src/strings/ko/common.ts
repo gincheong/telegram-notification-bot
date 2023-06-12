@@ -10,7 +10,7 @@ export const Common = {
     `봇에 대한 추가 정보는 <b>${BotCommands.INFO_PLAIN_TEXT}</b> 명령어로 확인할 수 있습니다.`,
     '',
     '문의: @gincheong',
-    '후원: [링크](https://githun.com/gincheong)',
+    '후원: https://www.buymeacoffee.com/zmUpSal',
     'Github: <a href="https://github.com/gincheong/telegram-notification-bot">telegram-notification-bot</a>',
   ],
 
