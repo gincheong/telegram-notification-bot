@@ -15,7 +15,8 @@ Bot.hears(BotCommands.ADD_KEYWORD, KeywordController.addKeyword);
 Bot.hears(BotCommands.DELETE_KEYWORD, KeywordController.deleteKeyword);
 
 Bot.hears(BotCommands.START, CommonController.start);
-Bot.hears(BotCommands.INFO, CommonController.info);
+Bot.hears(BotCommands.INFO, CommonController.showInformation);
+Bot.hears(BotCommands.CMD, CommonController.showCommands);
 
 Bot.hears(BotCommands.GET_GROUPS, GroupController.getGroups);
 

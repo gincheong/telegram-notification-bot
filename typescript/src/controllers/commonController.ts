@@ -13,31 +13,32 @@ class CommonControllerBuilder {
       const message = Strings[languageCode].START_PRIVATE.join('\n');
 
       context.reply(message, { parse_mode: 'HTML', disable_web_page_preview: true });
-    } else if (ChatTypes.GROUP === chatType || ChatTypes.SUPER_GROUP === chatType) {
+    } else {
+      // * Group or SuerGroup
       await GroupController.start(context);
     }
   }
 
-  info(context: TelegrafContext) {
+  showInformation(context: TelegrafContext) {
     const { chatType, languageCode } = getContextData(context);
 
-    if (chatType === ChatTypes.PRIVATE) {
+    if (chatType !== ChatTypes.PRIVATE) {
       return;
     }
 
-    const message = Strings[languageCode].INFO.join('\n');
+    const message = Strings[languageCode].SHOW_INFORMATION.join('\n');
 
     context.reply(message, { parse_mode: 'HTML' });
   }
 
-  donate(context: TelegrafContext) {
+  showCommands(context: TelegrafContext) {
     const { chatType, languageCode } = getContextData(context);
 
-    if (chatType === ChatTypes.PRIVATE) {
+    if (chatType !== ChatTypes.PRIVATE) {
       return;
     }
 
-    const message = Strings[languageCode].DONATE.join('\n');
+    const message = Strings[languageCode].SHOW_COMMANDS;
 
     context.reply(message, { parse_mode: 'HTML' });
   }

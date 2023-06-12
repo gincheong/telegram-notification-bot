@@ -4,7 +4,6 @@ export const BotCommands = {
   DELETE_KEYWORD: /^\/kdel/,
 
   START: /^\/start/,
-  HELP: /^\/help/,
   INFO: /^\/info/,
   INFO_PLAIN_TEXT: '/info',
   CMD: /^\/cmd/,
