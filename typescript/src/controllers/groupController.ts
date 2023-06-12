@@ -16,16 +16,21 @@ class GroupControllerBuilder {
     }
   }
 
-  async glist(context: TelegrafContext) {
+  async getGroups(context: TelegrafContext) {
     const { id, chatType, languageCode } = getContextData(context);
 
-    if (chatType === ChatTypes.PRIVATE) {
+    if (chatType !== ChatTypes.PRIVATE) {
       return;
     }
 
-    const groupNames = await GroupModel.getGroups(id);
+    const groupIds = await GroupModel.getGroups(id);
+    const promises = groupIds.map(async (groupId) => {
+      return await GroupModel.getGroupName(groupId);
+    });
 
-    if (groupNames.length === 0) {
+    const groupNames = await Promise.all(promises);
+
+    if (groupIds.length === 0) {
       context.reply(Strings[languageCode].GET_GROUPS_NO_DATA);
     } else {
       const messages = [Strings[languageCode].GET_GROUPS_SUCCESS, ...groupNames];

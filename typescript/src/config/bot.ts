@@ -9,4 +9,6 @@ export const BotCommands = {
   INFO_PLAIN_TEXT: '/info',
   CMD: /^\/cmd/,
   CMD_PLAIN_TEXT: '/cmd',
+
+  GET_GROUPS: /^\/glist$/,
 };

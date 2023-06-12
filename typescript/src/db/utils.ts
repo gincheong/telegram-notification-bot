@@ -7,3 +7,7 @@ export const getKeywordRef = (database: Database, id: number, keywordKey: string
 export const getUserGroupRef = (database: Database, id: number) => {
   return database.ref(`user/${id}/registered_group`);
 };
+
+export const getGroupRef = (database: Database, groupId: string) => {
+  return database.ref(`group/${groupId}/info/groupname`);
+};

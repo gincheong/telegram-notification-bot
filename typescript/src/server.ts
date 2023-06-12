@@ -17,7 +17,7 @@ Bot.hears(BotCommands.DELETE_KEYWORD, KeywordController.deleteKeyword);
 Bot.hears(BotCommands.START, CommonController.start);
 Bot.hears(BotCommands.INFO, CommonController.info);
 
-Bot.hears(BotCommands.START, GroupController.start);
+Bot.hears(BotCommands.GET_GROUPS, GroupController.getGroups);
 
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));
