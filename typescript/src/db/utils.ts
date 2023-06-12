@@ -8,6 +8,6 @@ export const getUserGroupRef = (database: Database, id: number) => {
   return database.ref(`user/${id}/registered_group`);
 };
 
-export const getGroupRef = (database: Database, groupId: string) => {
-  return database.ref(`group/${groupId}/info/groupname`);
+export const getGroupRef = (database: Database, groupId: number, path: string = '') => {
+  return database.ref(`group/${groupId}${path}`);
 };

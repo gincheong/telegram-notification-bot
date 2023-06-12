@@ -10,6 +10,7 @@ class GroupControllerBuilder {
     const { id, groupId, languageCode, chatType, title } = getContextData(context);
 
     if (ChatTypes.GROUP === chatType || ChatTypes.SUPER_GROUP === chatType) {
+      await GroupModel.updateGroupName(groupId, title);
       await GroupModel.addGroup(id, groupId, title);
 
       context.reply(Strings[languageCode].ADD_GROUP_SUCCESS_MESSAGES);
