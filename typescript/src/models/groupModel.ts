@@ -10,10 +10,16 @@ class GroupModelBuilder {
     try {
       Logger.debug(`Try inserting user: ${id}/${groupId}`);
 
-      // TODO 중복으로 추가하지 않아야 함
-      // await ref.push(id);
+      const snapshot = await ref.get();
+      const userIds = Object.values(snapshot.val()) as string[];
 
-      return true;
+      if (userIds.includes(String(id))) {
+        return false;
+      } else {
+        await ref.push(String(id));
+
+        return true;
+      }
     } catch (err) {
       const error = err as Error;
 
