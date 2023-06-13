@@ -14,7 +14,7 @@ class CommonControllerBuilder {
 
       context.reply(message, { parse_mode: 'HTML', disable_web_page_preview: true });
     } else {
-      // * Group or SuerGroup
+      // * Group or SuperGroup
       await GroupController.start(context);
     }
   }
