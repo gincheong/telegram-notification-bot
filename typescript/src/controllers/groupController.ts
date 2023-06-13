@@ -1,4 +1,4 @@
-import { GroupModel } from '@tnb/models';
+import { GroupModel, UserModel } from '@tnb/models';
 import { getContextData } from '@tnb/utils';
 import { ChatTypes, TelegrafContext } from '@tnb/types';
 import { Strings } from '@tnb/strings';
@@ -11,9 +11,14 @@ class GroupControllerBuilder {
 
     if (ChatTypes.GROUP === chatType || ChatTypes.SUPER_GROUP === chatType) {
       await GroupModel.updateGroupName(groupId, title);
-      await GroupModel.addGroup(id, groupId, title);
+      await GroupModel.addUser(id, groupId);
+      const isSuccess = await UserModel.addGroup(id, groupId);
 
-      context.reply(Strings[languageCode].ADD_GROUP_SUCCESS_MESSAGES);
+      if (isSuccess) {
+        context.reply(Strings[languageCode].ADD_GROUP_SUCCESS);
+      } else {
+        context.reply(Strings[languageCode].ADD_GROUP_DUPLICATED);
+      }
     }
   }
 

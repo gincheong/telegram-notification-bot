@@ -4,21 +4,20 @@ import { Logger } from '@tnb/utils';
 class GroupModelBuilder {
   constructor() {}
 
-  async addGroup(id: number, groupId: number, title: string) {
-    const ref = getUserGroupRef(db, id);
+  async addUser(id: number, groupId: number) {
+    const ref = getGroupRef(db, groupId, '/user');
 
     try {
-      Logger.debug(`Try updating groups: ${id}/${groupId}/${title}`);
+      Logger.debug(`Try inserting user: ${id}/${groupId}`);
 
-      await ref.update({ [groupId]: title });
+      // TODO 중복으로 추가하지 않아야 함
+      // await ref.push(id);
 
       return true;
     } catch (err) {
       const error = err as Error;
 
-      Logger.error(
-        `Exception while executing /addGroup: ${id}, ${groupId}, ${title}, ${error.message}`
-      );
+      Logger.error(`Exception while executing /addGroup: ${id}, ${groupId}, ${error.message}`);
 
       throw error;
     }
